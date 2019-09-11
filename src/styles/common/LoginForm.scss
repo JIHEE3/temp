@@ -1,0 +1,61 @@
+@import 'styles/globals';
+
+.m-login-wrap {
+  position: relative;
+  display: flex;
+  margin: 40px auto;
+  border-radius: 2px;
+  box-sizing: border-box;
+  min-height: 497px;
+  padding: 59px 69px;
+  max-width: 100%;
+  border: 0;
+
+  .m-login-inner {
+    display: flex;
+    margin: auto;
+
+    .m-login-wrap-banner {
+      display: inline-flex;
+      width: 540px;
+      height: 402px;
+      padding-right: 40px;
+      font-size: 16px;
+      vertical-align: top;
+      text-align: left;
+
+      .m-login-banner {
+        margin: auto;
+      }
+    }
+
+    .m-login-wrap-form {
+      display: inline-block;
+      width: 100%;
+      max-width: 480px;
+      padding: 60px 70px;
+      border: 1px solid #e5e5e5;
+      font-size: 16px;
+      vertical-align: top;
+      box-sizing: border-box;
+      text-align: left;
+
+      .m-login-message {
+        max-width: 315px;
+        height: 24px;
+        margin: 8px;
+        color: #546e7a;
+      }
+
+      .m-login-nav {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+
+        & a {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
