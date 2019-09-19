@@ -1,0 +1,9 @@
+{
+  "ko": {
+    "translation": {
+      "Welcome to React": "React and react-i18next에 오신 것을 환영합니다",
+      "매체": "매체",
+      "관리자": "관리자"
+    }
+  }
+}

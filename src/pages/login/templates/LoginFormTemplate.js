@@ -2,8 +2,6 @@ import React from 'react';
 
 import LoginFooter from 'components/organisms/Footer/LoginFooter';
 
-import 'styles/templates/LoginFormTemplate.scss';
-
 const LoginFormTemplate = ({ children }) => {
   return (
     <div className='m-loginForm-wrap'>

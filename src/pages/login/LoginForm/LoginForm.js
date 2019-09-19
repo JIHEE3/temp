@@ -12,9 +12,61 @@ import TouchAppIcon from '@material-ui/icons/TouchApp';
 import ChildCareIcon from '@material-ui/icons/ChildCare';
 
 import StyledBreadcrumb from 'components/atoms/StyledBreadcrumb';
-import 'styles/common/LoginForm.scss';
 
 const useStyles = makeStyles(theme => ({
+  loginWrap: {
+    position: 'relative',
+    display: 'flex',
+    // margin: 40px auto
+    margin: `${theme.spacing(5)}px auto`,
+    borderRadius: '2px',
+    boxSizing: 'border-box',
+    minHeight: '497px',
+    padding: '59px 69px',
+    maxWidth: '100%',
+    border: 0
+  },
+  loginInner: {
+    display: 'flex',
+    margin: 'auto'
+  },
+  loginBannerWrap: {
+    display: 'inline-flex',
+      width: '540px',
+      height: '402px',
+      paddingRight: theme.spacing(5),
+      fontSize: theme.spacing(2),
+      verticalAlign: 'top',
+      textAlign: 'left'
+  },
+  loginBanner: {
+    margin: 'auto'
+  },
+  loginFormWrap: {
+    display: 'inline-block',
+    width: '100%',
+    maxWidth: theme.spacing(60),
+    padding: "60px 70px",
+    border: '1px solid #e5e5e5',
+    fontSize: theme.spacing(2),
+    verticalAlign: 'top',
+    boxSizing: 'border-box',
+    textAlign: 'left'
+  },
+  loginMessage: {
+    maxWidth: '315px',
+    height: theme.spacing(3),
+    margin: theme.spacing(1),
+  },
+  loginNav: {
+    display: 'flex',
+    justifyContent: 'space-around',
+    marginTop: '20px',
+
+    '& a': {
+      cursor: 'pointer'
+    }
+  },
   container: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -37,14 +89,14 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
   const classes = useStyles();
 
   return (
-    <div className='m-login-wrap'>
-      <div className='m-login-inner'>
-        <div className='m-login-wrap-banner'>
-          <div className='m-login-banner'>
+    <div className={classes.loginWrap}>
+      <div className={classes.loginInner}>
+        <div className={classes.loginBannerWrap}>
+          <div className={classes.loginBanner}>
             <ChildCareIcon style={{ fontSize: 240, color: '#424242' }} />
           </div>
         </div>
-        <div className='m-login-wrap-form'>
+        <div className={classes.loginFormWrap}>
           <Typography variant='h4' gutterBottom>
             MOBON
           </Typography>
@@ -84,10 +136,10 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
             >
               로그인
             </Button>
-            <Typography className='m-login-message' variant='body1'>
+            <Typography className={classes.loginMessage} variant='body1'>
               {error}
             </Typography>
-            <div className='m-login-nav'>
+            <div className={classes.loginNav}>
               <StyledBreadcrumb
                 component='a'
                 href='/join'

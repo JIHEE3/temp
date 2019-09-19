@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+import momentPropTypes from 'react-moment-proptypes';
 import moment from 'moment';
 import omit from 'lodash/omit';
 
@@ -17,6 +19,23 @@ import {
   ANCHOR_LEFT
 } from 'react-dates/src/constants';
 import isSameDay from 'react-dates/src/utils/isSameDay';
+
+const propTypes = {
+  // example props for the demo
+  autoFocus: PropTypes.bool,
+  autoFocusEndDate: PropTypes.bool,
+  stateDateWrapper: PropTypes.func,
+  initialStartDate: momentPropTypes.momentObj,
+  initialEndDate: momentPropTypes.momentObj
+
+  // ...omit(DateRangePickerShape, [
+  //   'startDate',
+  //   'endDate',
+  //   'onDatesChange',
+  //   'focusedInput',
+  //   'onFocusChange'
+  // ])
+};
 
 const defaultProps = {
   // example props for the demo
@@ -164,6 +183,7 @@ class DateRangePickerWrapper extends React.Component {
   }
 }
 
+DateRangePickerWrapper.propTypes = propTypes;
 DateRangePickerWrapper.defaultProps = defaultProps;
 
 export default withStyles(({ reactDates: { color } }) => ({

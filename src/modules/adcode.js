@@ -55,8 +55,7 @@ const initialState = {
 const adcode = handleActions(
   {
     [FETCH_ADCODE_SUCCESS]: (state, { payload }) => {
-      const { data } = payload;
-      return { ...state, data };
+      return { ...state, data: payload };
     },
     [FETCH_ADCODE_FAILURE]: (state, { payload: error }) => ({
       ...state,

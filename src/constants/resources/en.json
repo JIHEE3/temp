@@ -1,0 +1,9 @@
+{
+  "en": {
+    "translation": {
+      "Welcome to React": "Welcome to React and react-i18next",
+      "매체": "Media",
+      "관리자": "Manager"
+    }
+  }
+}

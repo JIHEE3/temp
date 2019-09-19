@@ -10,8 +10,6 @@ import Header from 'components/organisms/Header/Header';
  * 로그인 관련 store 불러와야함
  */
 const HeaderContainer = ({ history }) => {
-  console.count();
-
   const dispatch = useDispatch();
   const { user } = useSelector(({ auth }) => ({
     user: auth.user

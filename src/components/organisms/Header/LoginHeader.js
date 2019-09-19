@@ -5,8 +5,8 @@ import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 
 const LoginHeader = () => {
   return (
-    <header className='m-main-header'>
-      <div className='m-logo'>
+    <header>
+      <div>
         <Link to='/'>
           <AccessibilityNewIcon fontSize='large' />
         </Link>

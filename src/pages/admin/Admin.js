@@ -1,5 +1,5 @@
 import React from 'react';
-import { Route, Redirect } from 'react-router-dom';
+import { Route } from 'react-router-dom';
 
 import AdminTemplate from 'pages/admin/templates/AdminTemplate';
 import AdcodeContainer from 'pages/admin/Adcode/AdcodeContainer';
@@ -8,7 +8,6 @@ import StatisticsContainer from 'pages/admin/Statistics/StatisticsContainer';
 const Admin = () => {
   return (
     <AdminTemplate>
-      <Redirect from='/admin' to='/admin/management' />
       <Route path='/admin/management' component={AdcodeContainer} />
       <Route path='/admin/statistics' component={StatisticsContainer} />
       <Route path='/admin/admix' render={() => `애드익스(외부연동)`} />

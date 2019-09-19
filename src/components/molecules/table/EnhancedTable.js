@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles } from '@material-ui/core/styles';
+import { lighten, makeStyles, createStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -15,31 +15,15 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
+// import FormControlLabel from '@material-ui/core/FormControlLabel';
+// import Switch from '@material-ui/core/Switch';
+import Skeleton from '@material-ui/lab/Skeleton';
+
 import DeleteIcon from '@material-ui/icons/Delete';
+import WarningIcon from '@material-ui/icons/Warning';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
-}
-
-const rows = [
-  createData('Cupcake', 305, 3.7, 67, 4.3),
-  createData('Donut', 452, 25.0, 51, 4.9),
-  createData('Eclair', 262, 16.0, 24, 6.0),
-  createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-  createData('Gingerbread', 356, 16.0, 49, 3.9),
-  createData('Honeycomb', 408, 3.2, 87, 6.5),
-  createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-  createData('Jelly Bean', 375, 0.0, 94, 0.0),
-  createData('KitKat', 518, 26.0, 65, 7.0),
-  createData('Lollipop', 392, 0.2, 98, 0.0),
-  createData('Marshmallow', 318, 0, 81, 2.0),
-  createData('Nougat', 360, 19.0, 9, 37.0),
-  createData('Oreo', 437, 18.0, 63, 4.0)
-];
-
+// 해당 orderBy key 값으로 순서 비교
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1;
@@ -50,6 +34,7 @@ function desc(a, b, orderBy) {
   return 0;
 }
 
+// api 로 테이블 정렬한다면 이 함수 필요 없을 듯
 function stableSort(array, cmp) {
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
@@ -66,19 +51,6 @@ function getSorting(order, orderBy) {
     : (a, b) => -desc(a, b, orderBy);
 }
 
-const headCells = [
-  {
-    id: 'name',
-    numeric: false,
-    disablePadding: true,
-    label: 'Dessert (100g serving)'
-  },
-  { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
-  { id: 'fat', numeric: true, disablePadding: false, label: 'Fat (g)' },
-  { id: 'carbs', numeric: true, disablePadding: false, label: 'Carbs (g)' },
-  { id: 'protein', numeric: true, disablePadding: false, label: 'Protein (g)' }
-];
-
 function EnhancedTableHead(props) {
   const {
     classes,
@@ -87,8 +59,10 @@ function EnhancedTableHead(props) {
     orderBy,
     numSelected,
     rowCount,
-    onRequestSort
+    onRequestSort,
+    headCells
   } = props;
+
   const createSortHandler = property => event => {
     onRequestSort(event, property);
   };
@@ -99,7 +73,7 @@ function EnhancedTableHead(props) {
         <TableCell padding='checkbox'>
           <Checkbox
             indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={numSelected === rowCount}
+            checked={!!numSelected && numSelected === rowCount}
             onChange={onSelectAllClick}
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
@@ -211,7 +185,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
 };
 
-const useStyles = makeStyles(theme => ({
+const useStyles = makeStyles(theme => createStyles({
   root: {
     width: '100%',
     marginTop: theme.spacing(3)
@@ -224,7 +198,9 @@ const useStyles = makeStyles(theme => ({
     minWidth: 750
   },
   tableWrapper: {
-    overflowX: 'auto'
+    // overflowX: 'auto'
+    overflow: 'auto'
+    // maxHeight:
   },
   visuallyHidden: {
     border: 0,
@@ -239,13 +215,19 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
-export default function EnhancedTable() {
+export default function EnhancedTable({
+  headCells,
+  rows = [],
+  error,
+  loading
+}) {
+  rows = !rows ? [] : rows;
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
   const [page, setPage] = React.useState(0);
-  const [dense, setDense] = React.useState(false);
+  // const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
 
   function handleRequestSort(event, property) {
@@ -293,9 +275,9 @@ export default function EnhancedTable() {
     setPage(0);
   }
 
-  function handleChangeDense(event) {
-    setDense(event.target.checked);
-  }
+  // function handleChangeDense(event) {
+  //   setDense(event.target.checked);
+  // }
 
   const isSelected = name => selected.indexOf(name) !== -1;
 
@@ -310,7 +292,8 @@ export default function EnhancedTable() {
           <Table
             className={classes.table}
             aria-labelledby='tableTitle'
-            size={dense ? 'small' : 'medium'}
+            // size={dense ? 'small' : 'medium'}
+            stickyHeader
           >
             <EnhancedTableHead
               classes={classes}
@@ -320,6 +303,7 @@ export default function EnhancedTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
+              headCells={headCells}
             />
             <TableBody>
               {stableSort(rows, getSorting(order, orderBy))
@@ -361,7 +345,23 @@ export default function EnhancedTable() {
                 })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={headCells.length + 1}>
+                    {loading ? (
+                      <>
+                        <Skeleton />
+                        <Skeleton width='60%' />
+                        <Skeleton />
+                        <Skeleton width='60%' />
+                        <Skeleton />
+                        <Skeleton width='60%' />
+                      </>
+                    ) : error ? (
+                      <>
+                        <WarningIcon color='error' fontSize='large' />
+                        No Data
+                      </>
+                    ) : null}
+                  </TableCell>
                 </TableRow>
               )}
             </TableBody>
@@ -383,10 +383,10 @@ export default function EnhancedTable() {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-      <FormControlLabel
+      {/* <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label='Dense padding'
-      />
+      /> */}
     </div>
   );
 }

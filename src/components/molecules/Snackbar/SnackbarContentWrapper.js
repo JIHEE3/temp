@@ -1,15 +1,15 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import { amber, green } from '@material-ui/core/colors';
-import { SnackbarContent, IconButton } from '@material-ui/core';
-import {
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Info as InfoIcon,
-  Close as CloseIcon,
-  Warning as WarningIcon
-} from '@material-ui/icons';
+import SnackbarContent from '@material-ui/core/SnackbarContent';
+import IconButton from '@material-ui/core/IconButton';
+import CheckCircleIcon from '@material-ui/icons/CheckCircle';
+import ErrorIcon from '@material-ui/icons/Error';
+import InfoIcon from '@material-ui/icons/Info';
+import CloseIcon from '@material-ui/icons/Close';
+import WarningIcon from '@material-ui/icons/Warning';
 
 const variantIcon = {
   success: CheckCircleIcon,
@@ -72,6 +72,13 @@ const SnackbarContentWrapper = props => {
       {...other}
     />
   );
+};
+
+SnackbarContentWrapper.propTypes = {
+  className: PropTypes.string,
+  message: PropTypes.string,
+  onClose: PropTypes.func,
+  variant: PropTypes.oneOf(['error', 'info', 'success', 'warning']).isRequired
 };
 
 export default SnackbarContentWrapper;

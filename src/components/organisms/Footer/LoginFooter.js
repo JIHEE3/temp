@@ -1,13 +1,26 @@
 import React from 'react';
 import Link from '@material-ui/core/Link';
 import { Link as RouterLink } from 'react-router-dom';
+import { makeStyles } from '@material-ui/core/styles';
 
-import 'styles/common/LoginFooter.scss';
+const LoginFooterStyles = makeStyles(theme => ({
+  root: {
+    display: 'flex'
+  },
+  footerNav: {
+    margin: 'auto',
+    '& > a': {
+      padding: theme.spacing(1),
+    }
+  }
+}));
 
 const LoginFooter = () => {
+  const classes = LoginFooterStyles();
+
   return (
-    <footer className='m-login-footer'>
-      <div className='m-login-footer-nav'>
+    <footer className={classes.root}>
+      <div className={classes.footerNav}>
         <Link component={RouterLink} to='/'>
           이용약관
         </Link>
