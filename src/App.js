@@ -8,7 +8,7 @@ import {
   StylesProvider,
   createGenerateClassName
 } from '@material-ui/styles';
-import { lime } from '@material-ui/core/colors';
+import { indigo, deepPurple } from '@material-ui/core/colors';
 
 import Login from 'pages/login/Login';
 import Join from 'pages/join/Join';
@@ -16,7 +16,7 @@ import Admin from 'pages/admin/Admin';
 import Media from 'pages/media/Media';
 
 const generateClassName = createGenerateClassName({
-  productionPrefix: 'c'
+  productionPrefix: 'testest'
 });
 
 /**
@@ -28,7 +28,8 @@ const theme = createMuiTheme({
     action: {
       // hover: 'rgba(245, 0, 87, 0.08)'
     },
-    primary: lime,
+    primary: indigo,
+    secondary: deepPurple,
     text: {
       // primary: '#33691e'
     }
@@ -43,19 +44,21 @@ function App() {
 
   console.dir(theme);
   return (
-    <StylesProvider generateClassName={generateClassName}>
-      <ThemeProvider theme={theme}>
-        {/* <h2>{t('Welcome to React')}</h2> */}
-        <Switch>
-          <Route path={['/login', '/find_password']} component={Login} />
-          <Route path='/join' component={Join} />
-          <Route path='/admin' component={Admin} />
-          <Redirect exact from='/' to='/admin/management' />
-          <Route path='/media' component={Media} />
-          <Route render={() => <div>못찾음</div>} />
-        </Switch>
-      </ThemeProvider>
-    </StylesProvider>
+    <div style={{display: 'flex'}}>
+      <StylesProvider generateClassName={generateClassName}>
+        <ThemeProvider theme={theme}>
+          {/* <h2>{t('Welcome to React')}</h2> */}
+          <Switch>
+            <Route path={['/login', '/find_password']} component={Login} />
+            <Route path='/join' component={Join} />
+            <Route path='/admin' component={Admin} />
+            <Redirect exact from='/' to='/admin/management' />
+            <Route path='/media' component={Media} />
+            <Route render={() => <div>못찾음</div>} />
+          </Switch>
+        </ThemeProvider>
+      </StylesProvider>
+    </div>
   );
 }
 

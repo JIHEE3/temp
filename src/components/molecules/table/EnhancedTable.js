@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles, createStyles } from '@material-ui/core/styles';
+import { lighten, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -185,7 +185,7 @@ EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
 };
 
-const useStyles = makeStyles(theme => createStyles({
+const useStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     marginTop: theme.spacing(3)
@@ -358,7 +358,7 @@ export default function EnhancedTable({
                     ) : error ? (
                       <>
                         <WarningIcon color='error' fontSize='large' />
-                        No Data
+                        Error
                       </>
                     ) : null}
                   </TableCell>

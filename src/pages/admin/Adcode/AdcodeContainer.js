@@ -65,9 +65,7 @@ const AdcodeContainer = () => {
       <div>광고 상품 관리(api req 테스트 / error , loading 사용해야함)</div>
       <EnhancedTable
         rows={data}
-        // rows={[]}
-        // error={error}
-        error={true}
+        error={error}
         loading={loading}
         headCells={headCells}
       />
