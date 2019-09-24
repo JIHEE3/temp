@@ -1,15 +1,13 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-
-import { FETCH_ADCODE, fetchAdcode } from 'modules/adcode';
+import React, { useState, useEffect } from 'react';
 import EnhancedTable from 'components/molecules/table/EnhancedTable';
 import AdminTemplate from 'pages/templates/AdminTemplate';
+import * as adAPI from 'lib/api/ad';
 
 const headCells = [
   {
     id: 'name',
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: 'Dessert (100g serving)'
   },
   { id: 'calories', numeric: true, disablePadding: false, label: 'Calories' },
@@ -39,43 +37,37 @@ const headCells = [
 //   createData('Oreo', 437, 18.0, 63, 4.0)
 // ];
 
-/**
- * redux 사용 예
- */
-const AdcodeContainer = () => {
-  const dispatch = useDispatch();
-  const { data, error, loading /*, user*/ } = useSelector(
-    ({ adcode, loading /*, user */ }) => ({
-      data: adcode.data,
-      error: adcode.error,
-      loading: loading[FETCH_ADCODE]
-      /*user: auth.user,*/
-    })
-  );
+const TableTestPage = () => {
+  const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    const temp = {
-      cmd: 'getList',
-      tab_type: 'main',
-      sdate: '2019-09-05',
-      edate: '2019-09-05',
-      adExchange_flag: 'Y'
-    };
-    dispatch(fetchAdcode(temp));
-  }, [dispatch]);
+    setLoading(true);
+    adAPI
+      .adcodeList({})
+      .then(response => {
+        setData(response);
+      })
+      .catch(error => {
+        console.log(error);
+        setError(true);
+      })
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <AdminTemplate>
-      <div>광고 상품 관리(api req 테스트 / error , loading 사용해야함)</div>
+      <div>api req 테스트 / error , loading 사용해야함</div>
       <EnhancedTable
         rows={data}
         error={error}
         loading={loading}
         headCells={headCells}
-        hasCheckbox={true}
+        hasCheckbox={false}
       />
     </AdminTemplate>
   );
 };
 
-export default AdcodeContainer;
+export default TableTestPage;

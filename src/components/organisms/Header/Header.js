@@ -19,6 +19,7 @@ const useStyles = makeStyles(theme => ({
   header: {
     display: 'flex',
     background: '#181c27',
+    height: '70px',
     justifyContent: 'space-between',
     '& > :first-child': {
       flexGrow: 1
@@ -79,17 +80,17 @@ const Header = ({ history, user, onLogout }) => {
         <IconButton
           className={classes.logoBtn}
           onClick={goMain}
-          color='primary'
+          color="primary"
         >
-          <AccessibilityNewIcon color='primary' fontSize='large' />
+          <AccessibilityNewIcon color="primary" fontSize="large" />
         </IconButton>
       </div>
 
       <div className={classes.buttonWrap}>
         <Grid item className={classes.tabButtonWrap}>
           <ButtonGroup
-            variant='contained'
-            color='primary'
+            variant="contained"
+            color="primary"
             className={classes.tabButtonGroup}
           >
             <Button onClick={() => changeTab('/media')}>
@@ -104,38 +105,38 @@ const Header = ({ history, user, onLogout }) => {
         </Grid>
         <div>
           {user ? (
-            <div className='right'>
+            <div className="right">
               <div>{user.username}</div>
               <Fab
-                color='primary'
-                aria-label='Payment'
+                color="primary"
+                aria-label="Payment"
                 className={classes.fab}
-                size='small'
+                size="small"
               >
                 <PaymentIcon />
               </Fab>
               <Fab
-                color='primary'
-                aria-label='Edit'
+                color="primary"
+                aria-label="Edit"
                 className={classes.fab}
-                size='small'
+                size="small"
               >
                 <EditIcon />
               </Fab>
               <Fab
-                color='secondary'
+                color="secondary"
                 onClick={onLogout}
-                aria-label='Logout'
+                aria-label="Logout"
                 className={classes.fab}
-                size='small'
+                size="small"
               >
                 <ExitToAppIcon />
               </Fab>
             </div>
           ) : (
-            <div className='right'>
-              <Link to='/login'>
-                <Button variant='contained' color='primary'>
+            <div className="right">
+              <Link to="/login">
+                <Button variant="contained" color="primary">
                   로그인
                 </Button>
               </Link>

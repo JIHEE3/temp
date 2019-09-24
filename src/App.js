@@ -1,22 +1,27 @@
-import React from "react";
+import React from 'react';
 // import './App.css';
-import { Route, Switch, Redirect } from "react-router-dom";
-// import { useTranslation } from "react-i18next";
-import { createMuiTheme } from "@material-ui/core/styles";
+import { Route, Switch, Redirect } from 'react-router-dom';
+import { createMuiTheme } from '@material-ui/core/styles';
 import {
   ThemeProvider,
   StylesProvider,
   createGenerateClassName
-} from "@material-ui/styles";
-import { indigo, deepPurple } from "@material-ui/core/colors";
+} from '@material-ui/styles';
+import { indigo, deepPurple } from '@material-ui/core/colors';
 
-import Login from "pages/login/Login";
-import Join from "pages/join/Join";
-import Admin from "pages/admin/Admin";
-import Media from "pages/media/Media";
+import Join from 'pages/join/Join/Join';
+import LoginFormContainer from 'pages/login/LoginForm/LoginFormContainer';
+import AdcodeContainer from 'pages/admin/Adcode/AdcodeContainer';
+import StatisticsContainer from 'pages/admin/Statistics/StatisticsContainer';
+import ChartTestPageContainer from 'pages/admin/ChartTestPage/ChartTestPageContainer';
+import TableTestPageContainer from 'pages/admin/TableTestPage/TableTestPageContainer';
+
+// 임시
+import LoginTemplate from 'pages/templates/LoginTemplate';
+import MediaTemplate from 'pages/templates/MediaTemplate';
 
 const generateClassName = createGenerateClassName({
-  productionPrefix: "testest"
+  productionPrefix: 'testest'
 });
 
 /**
@@ -44,16 +49,36 @@ function App() {
 
   console.dir(theme);
   return (
-    <div style={{ display: "flex" }}>
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>
           {/* <h2>{t('Welcome to React')}</h2> */}
           <Switch>
-            <Route path={["/login", "/find_password"]} component={Login} />
+            {/* 로그인 */}
+            <Route exact path="/login" component={LoginFormContainer} />
+            <Route
+              path="/find-password"
+              render={() => <LoginTemplate>비밀번호 찾기</LoginTemplate>}
+            />
+            {/* 가입 */}
             <Route path="/join" component={Join} />
-            <Route path="/admin" component={Admin} />
+            {/* 관리자 */}
+            <Route path="/admin/management" component={AdcodeContainer} />
+            <Route path="/admin/test" component={ChartTestPageContainer} />
+            <Route path="/admin/tes1" component={TableTestPageContainer} />
+            <Route path="/admin/statistics" component={StatisticsContainer} />
+            <Route path="/admin/admix" render={() => `애드익스(외부연동)`} />
+            <Route path="/admin/mediaLive" render={() => `광고송출리스트`} />
+            <Route path="/admin/checkImg" render={() => `이미지검수`} />
+            <Route path="/admin/etc" render={() => `기타`} />
+            <Route path="/admin/RTB" render={() => `RTB`} />
             <Redirect exact from="/" to="/admin/management" />
-            <Route path="/media" component={Media} />
+            {/* 매체 */}
+            <Route
+              path="/media"
+              render={() => <MediaTemplate>media</MediaTemplate>}
+            />
+            {/* 404 페이지 */}
             <Route render={() => <div>못찾음</div>} />
           </Switch>
         </ThemeProvider>

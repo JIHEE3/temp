@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { withRouter } from 'react-router-dom';
@@ -21,13 +21,13 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import FilterHdrIcon from '@material-ui/icons/FilterHdr';
 import CloseIcon from '@material-ui/icons/Close';
 import DehazeIcon from '@material-ui/icons/Dehaze';
-import { grey } from '@material-ui/core/colors';
 
 const nestedListStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 360,
     backgroundColor: theme.palette.background.paper,
+    overflowX: 'hidden',
     '& .selected': {
       color: '#fff',
       backgroundColor: theme.palette.primary.main
@@ -76,15 +76,6 @@ const nestedListStyles = makeStyles(theme => ({
     width: '300px',
     left: 0
   },
-  fake: {
-    backgroundColor: grey[200],
-    height: theme.spacing(1),
-    margin: theme.spacing(2),
-    // Selects every two elements among any group of siblings.
-    '&:nth-child(2n)': {
-      marginRight: theme.spacing(3)
-    }
-  },
   icon: {
     minWidth: 'auto'
   },
@@ -125,8 +116,8 @@ function SubMenu(props) {
 
   let openHighMenu = false;
   const subMenuUi = (
-    <Collapse in={open} timeout='auto' unmountOnExit className={className}>
-      <List component='div' disablePadding className={classes.listWrap}>
+    <Collapse in={open} timeout="auto" unmountOnExit className={className}>
+      <List component="div" disablePadding className={classes.listWrap}>
         {menuList.map(menu => {
           const { seq, url, name } = menu;
           if (!openHighMenu) {
@@ -165,9 +156,8 @@ export default withRouter(function AdminNav(props) {
   const { pathname = '/admin/management' } = location;
   const classes = nestedListStyles();
   // status
-  const [openKeys, setOpenKeys] = React.useState([true]);
-  const [curTab, setCurTab] = React.useState(pathname);
-  const fake = <div className={classes.fake} />;
+  const [openKeys, setOpenKeys] = useState([true]);
+  const [curTab, setCurTab] = useState(pathname);
 
   useEffect(() => {
     setCurTab(pathname);
@@ -254,30 +244,59 @@ export default withRouter(function AdminNav(props) {
     }
   }
 
-  function handlePopoverOpen(event) {
+  function handlePopoverOpen({ event, subMenu = [] }) {
     event.stopPropagation();
     const { currentTarget } = event;
-    const { offsetTop, offsetLeft, offsetWidth, textContent } = currentTarget;
-    const popoverEl = document.getElementById(menuPopoverId);
+    const {
+      offsetTop,
+      offsetLeft,
+      offsetWidth,
+      textContent,
+      parentElement
+    } = currentTarget;
+    const headerHeight = 70;
+    const popoverParentEl = document.getElementById(menuPopoverId);
+    // popover 보여질 위치
+    let popoverTop = offsetTop + headerHeight - parentElement.scrollTop;
+    let popContent = popoverParentEl && popoverParentEl.firstChild;
 
-    if (popoverEl === null) {
+    if (popoverParentEl === null) {
       var popover = document.createElement('div');
       popover.setAttribute('id', menuPopoverId);
       document.getElementById('root').appendChild(popover);
     } else {
-      popoverEl.style.display = 'block';
+      popoverParentEl.style.display = 'block';
     }
-    debugger;
+
+    // popover 가 window 벗어날 경우 벗어나지 않도록 위치 조정
+    if (popContent) {
+      if (popoverTop + popContent.offsetHeight > window.innerHeight) {
+        popoverTop =
+          popoverTop - popContent.offsetHeight + currentTarget.offsetHeight;
+      }
+
+      if (popoverTop + popContent.offsetHeight > window.innerHeight) {
+        popoverTop =
+          popoverTop -
+          (popoverTop + popContent.offsetHeight - window.innerHeight);
+      }
+    }
+
     ReactDOM.render(
       <Paper
         className={classes.paper}
-        style={{ top: offsetTop, left: offsetLeft + offsetWidth }}
+        style={{
+          top: popoverTop,
+          left:
+            offsetLeft +
+            offsetWidth +
+            (parentElement.offsetWidth - parentElement.clientWidth)
+        }}
       >
         {textContent}
-        {fake}
-        {fake}
-        {fake}
-        {fake}
+        {subMenu.map(menu => (
+          <div key={menu.seq}>{menu.name}</div>
+        ))}
       </Paper>,
       document.getElementById(menuPopoverId)
     );
@@ -290,16 +309,16 @@ export default withRouter(function AdminNav(props) {
 
   return (
     <List
-      component='nav'
-      aria-labelledby='nested-list-subheader'
+      component="nav"
+      aria-labelledby="nested-list-subheader"
       subheader={
         <ListSubheader
-          component='div'
-          id='nested-list-subheader'
+          component="div"
+          id="nested-list-subheader"
           className={clsx(classes.listHeader, { [classes.center]: !navOpen })}
         >
           <Typography
-            variant='h5'
+            variant="h5"
             gutterBottom
             className={clsx({ [classes.hide]: !navOpen })}
           >
@@ -326,8 +345,10 @@ export default withRouter(function AdminNav(props) {
             <ListItem
               button
               onClick={event => handleClick({ event, index, hasSubMenu, url })}
-              onMouseEnter={handlePopoverOpen}
-              onMouseLeave={handlePopoverClose}
+              onMouseEnter={
+                !navOpen ? event => handlePopoverOpen({ event, subMenu }) : null
+              }
+              onMouseLeave={!navOpen ? handlePopoverClose : null}
               className={clsx(classes.listItemWrap, {
                 selected: curTab === url
               })}

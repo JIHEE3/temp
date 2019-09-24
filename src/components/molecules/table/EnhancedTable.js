@@ -60,7 +60,8 @@ function EnhancedTableHead(props) {
     numSelected,
     rowCount,
     onRequestSort,
-    headCells
+    headCells,
+    hasCheckbox
   } = props;
 
   const createSortHandler = property => event => {
@@ -70,14 +71,16 @@ function EnhancedTableHead(props) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding='checkbox'>
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={!!numSelected && numSelected === rowCount}
-            onChange={onSelectAllClick}
-            inputProps={{ 'aria-label': 'select all desserts' }}
-          />
-        </TableCell>
+        {hasCheckbox ? (
+          <TableCell padding="checkbox">
+            <Checkbox
+              indeterminate={numSelected > 0 && numSelected < rowCount}
+              checked={!!numSelected && numSelected === rowCount}
+              onChange={onSelectAllClick}
+              inputProps={{ 'aria-label': 'select all desserts' }}
+            />
+          </TableCell>
+        ) : null}
         {headCells.map(headCell => (
           <TableCell
             key={headCell.id}
@@ -152,11 +155,11 @@ const EnhancedTableToolbar = props => {
     >
       <div className={classes.title}>
         {numSelected > 0 ? (
-          <Typography color='inherit' variant='subtitle1'>
+          <Typography color="inherit" variant="subtitle1">
             {numSelected} selected
           </Typography>
         ) : (
-          <Typography variant='h6' id='tableTitle'>
+          <Typography variant="h6" id="tableTitle">
             Nutrition
           </Typography>
         )}
@@ -164,14 +167,14 @@ const EnhancedTableToolbar = props => {
       <div className={classes.spacer} />
       <div className={classes.actions}>
         {numSelected > 0 ? (
-          <Tooltip title='Delete'>
-            <IconButton aria-label='delete'>
+          <Tooltip title="Delete">
+            <IconButton aria-label="delete">
               <DeleteIcon />
             </IconButton>
           </Tooltip>
         ) : (
-          <Tooltip title='Filter list'>
-            <IconButton aria-label='filter list'>
+          <Tooltip title="Filter list">
+            <IconButton aria-label="filter list">
               <FilterListIcon />
             </IconButton>
           </Tooltip>
@@ -219,7 +222,8 @@ export default function EnhancedTable({
   headCells,
   rows = [],
   error,
-  loading
+  loading,
+  hasCheckbox = true
 }) {
   rows = !rows ? [] : rows;
   const classes = useStyles();
@@ -291,7 +295,7 @@ export default function EnhancedTable({
         <div className={classes.tableWrapper}>
           <Table
             className={classes.table}
-            aria-labelledby='tableTitle'
+            aria-labelledby="tableTitle"
             // size={dense ? 'small' : 'medium'}
             stickyHeader
           >
@@ -304,6 +308,7 @@ export default function EnhancedTable({
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
               headCells={headCells}
+              hasCheckbox={hasCheckbox}
             />
             <TableBody>
               {stableSort(rows, getSorting(order, orderBy))
@@ -312,34 +317,49 @@ export default function EnhancedTable({
                   const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
+                  const rowProps = !hasCheckbox
+                    ? {}
+                    : {
+                        onClick: event => handleClick(event, row.name),
+                        role: 'checkbox',
+                        'aria-checked': isItemSelected,
+                        selected: isItemSelected
+                      };
+
+                  const firstCellProps = !hasCheckbox
+                    ? {}
+                    : {
+                        component: 'th',
+                        id: { labelId },
+                        scope: 'row',
+                        padding: 'none'
+                      };
+
                   return (
-                    <TableRow
-                      hover
-                      onClick={event => handleClick(event, row.name)}
-                      role='checkbox'
-                      aria-checked={isItemSelected}
-                      tabIndex={-1}
-                      key={row.name}
-                      selected={isItemSelected}
-                    >
-                      <TableCell padding='checkbox'>
-                        <Checkbox
-                          checked={isItemSelected}
-                          inputProps={{ 'aria-labelledby': labelId }}
-                        />
-                      </TableCell>
-                      <TableCell
-                        component='th'
-                        id={labelId}
-                        scope='row'
-                        padding='none'
-                      >
-                        {row.name}
-                      </TableCell>
-                      <TableCell align='right'>{row.calories}</TableCell>
-                      <TableCell align='right'>{row.fat}</TableCell>
-                      <TableCell align='right'>{row.carbs}</TableCell>
-                      <TableCell align='right'>{row.protein}</TableCell>
+                    <TableRow hover tabIndex={-1} key={row.name} {...rowProps}>
+                      {hasCheckbox ? (
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                          />
+                        </TableCell>
+                      ) : null}
+                      {headCells.map((headCell, index) => {
+                        if (index === 0) {
+                          return (
+                            <TableCell key={headCell.id} {...firstCellProps}>
+                              {row[headCell.id]}
+                            </TableCell>
+                          );
+                        } else {
+                          return (
+                            <TableCell key={headCell.id} align="right">
+                              {row[headCell.id]}
+                            </TableCell>
+                          );
+                        }
+                      })}
                     </TableRow>
                   );
                 })}
@@ -349,15 +369,15 @@ export default function EnhancedTable({
                     {loading ? (
                       <>
                         <Skeleton />
-                        <Skeleton width='60%' />
+                        <Skeleton width="60%" />
                         <Skeleton />
-                        <Skeleton width='60%' />
+                        <Skeleton width="60%" />
                         <Skeleton />
-                        <Skeleton width='60%' />
+                        <Skeleton width="60%" />
                       </>
                     ) : error ? (
                       <>
-                        <WarningIcon color='error' fontSize='large' />
+                        <WarningIcon color="error" fontSize="large" />
                         Error
                       </>
                     ) : null}
@@ -369,7 +389,7 @@ export default function EnhancedTable({
         </div>
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
-          component='div'
+          component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
           page={page}
