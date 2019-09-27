@@ -4,6 +4,8 @@ import AdminTemplate from 'pages/templates/AdminTemplate';
 import * as adAPI from 'lib/api/advertiser';
 import { reportHeaders } from 'lib/api/common';
 
+import MultipleChart from 'components/organisms/Chart/MultiplexChart';
+
 let headCells = [];
 
 const TableTestPage2 = () => {
@@ -60,6 +62,7 @@ const TableTestPage2 = () => {
   return (
     <AdminTemplate>
       <div>전략관리</div>
+      <MultipleChart />
       <EnhancedTable
         rows={data}
         error={error}

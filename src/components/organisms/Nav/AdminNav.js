@@ -208,7 +208,7 @@ export default withRouter(function AdminNav(props) {
         { seq: '5-3', name: '키워드별 CPC관리', url: '/admin/test5' }
       ]
     },
-    { seq: '6', name: '전략 관리', url: '/admin/test6' },
+    { seq: '6', name: '여기 눌러봐요', url: '/admin/test6' },
     { seq: '7', name: '사용자 관리', url: '/admin/test7' },
     {
       seq: '8',
