@@ -12,21 +12,30 @@ const adminTemplateStyles = makeStyles(theme => ({
   root: {
     flexGrow: 1
   },
-  mainSplit: {
-    display: 'flex',
-    position: 'relative',
-    paddingLeft: '250px',
-    transitionDuration: '0.3s'
-  },
-  folded: {
-    paddingLeft: theme.spacing(7) + 1,
-    [theme.breakpoints.up('sm')]: {
-      paddingLeft: theme.spacing(9) + 1
-    }
-  },
   content: {
-    flexGrow: 1,
-    padding: theme.spacing(3)
+    transitionDuration: '0.4s',
+    // position: 'fixed',
+    // height: '500px',
+    position: 'absolute',
+    display: 'flex',
+    flex: '1 0 auto',
+    top: '70px',
+    bottom: '0',
+    left: theme.spacing(7) + 1,
+    [theme.breakpoints.up('sm')]: {
+      left: theme.spacing(9) + 1
+    },
+    right: 0,
+    overflow: 'auto',
+    '&.navOpen': {
+      left: drawerWidth
+    },
+    '& > div': {
+      position: 'relative',
+      padding: theme.spacing(3),
+      width: '95%',
+      flex: '1 0 auto'
+    }
   },
   drawer: {
     width: drawerWidth,
@@ -74,24 +83,24 @@ const AdminTemplate = ({ children }) => {
   return (
     <div className={classes.root}>
       <HeaderContainer />
-      <div className={clsx(classes.mainSplit, { [classes.folded]: !navOpen })}>
-        <Drawer
-          variant="permanent"
-          className={clsx(classes.drawer, {
+      <Drawer
+        variant="permanent"
+        className={clsx(classes.drawer, {
+          [classes.drawerOpen]: navOpen,
+          [classes.drawerClose]: !navOpen
+        })}
+        classes={{
+          paper: clsx({
             [classes.drawerOpen]: navOpen,
             [classes.drawerClose]: !navOpen
-          })}
-          classes={{
-            paper: clsx({
-              [classes.drawerOpen]: navOpen,
-              [classes.drawerClose]: !navOpen
-            })
-          }}
-          open={navOpen}
-        >
-          <AdminNav navOpen={navOpen} handleDrawerToggle={handleDrawerToggle} />
-        </Drawer>
-        <div className={classes.content}>{children}</div>
+          })
+        }}
+        open={navOpen}
+      >
+        <AdminNav navOpen={navOpen} handleDrawerToggle={handleDrawerToggle} />
+      </Drawer>
+      <div className={clsx(classes.content, { navOpen })}>
+        <div>{children}</div>
       </div>
     </div>
   );

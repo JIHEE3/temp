@@ -45,7 +45,7 @@ const TableTestPage = () => {
   useEffect(() => {
     setLoading(true);
     adAPI
-      .adcodeList({})
+      .adcodeList()
       .then(response => {
         setData(response);
       })

@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
 
 import { logout } from 'modules/auth';
+import { changeLocale } from 'modules/locale';
 
 import Header from 'components/organisms/Header/Header';
 
@@ -11,9 +12,17 @@ import Header from 'components/organisms/Header/Header';
  */
 const HeaderContainer = ({ history }) => {
   const dispatch = useDispatch();
-  const { user } = useSelector(({ auth }) => ({
-    user: auth.user
+  const { user, locale } = useSelector(({ auth, locale }) => ({
+    user: auth.user,
+    locale: locale.locale
   }));
+
+  /**
+   * 언어 변경
+   */
+  const changeLang = async locale => {
+    await dispatch(changeLocale(locale));
+  };
 
   /**
    * 로그아웃 버튼 클릭
@@ -25,7 +34,12 @@ const HeaderContainer = ({ history }) => {
 
   return (
     <>
-      <Header user={user} onLogout={onLogout} />
+      <Header
+        user={user}
+        locale={locale}
+        changeLang={changeLang}
+        onLogout={onLogout}
+      />
     </>
   );
 };

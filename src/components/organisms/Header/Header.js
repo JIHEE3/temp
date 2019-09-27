@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import clsx from 'clsx';
 import { Link, withRouter } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
@@ -7,6 +8,9 @@ import Grid from '@material-ui/core/Grid';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
 import IconButton from '@material-ui/core/IconButton';
 import Button from '@material-ui/core/Button';
+import Popover from '@material-ui/core/Popover';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
 
 import EditIcon from '@material-ui/icons/Edit';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
@@ -14,18 +18,32 @@ import PaymentIcon from '@material-ui/icons/Payment';
 import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
 import HomeIcon from '@material-ui/icons/Home';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const useStyles = makeStyles(theme => ({
   header: {
     display: 'flex',
-    background: '#181c27',
+    background: theme.palette.background.header,
     height: '70px',
     justifyContent: 'space-between',
+    position: 'fixed',
+    width: '100%',
+    zIndex: '10',
+    flex: '1',
+    left: '0',
     '& > :first-child': {
       flexGrow: 1
     }
   },
-  logoBtn: {
+  langBtn: {
+    backgroundColor: theme.palette.background.header,
+    color: theme.palette.getContrastText(theme.palette.background.header),
+    margin: theme.spacing(1),
+    '&:hover': {
+      backgroundColor: '#263238'
+    }
+  },
+  buttonMargin: {
     margin: theme.spacing(1)
   },
   tabButtonWrap: {
@@ -39,7 +57,7 @@ const useStyles = makeStyles(theme => ({
     display: 'inline-flex',
     padding: theme.spacing(1, 2)
   },
-  link: {
+  flex: {
     display: 'flex'
   },
   icon: {
@@ -56,16 +74,32 @@ const useStyles = makeStyles(theme => ({
   },
   fab: {
     margin: theme.spacing(1)
+  },
+  rightIcon: {
+    marginLeft: theme.spacing(1)
   }
 }));
 
-const Header = ({ history, user, onLogout }) => {
+const Header = ({ history, user, locale, changeLang, onLogout }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
   const { t } = useTranslation();
   const classes = useStyles();
+  const open = Boolean(anchorEl);
 
   function goMain() {
     history.push('/');
   }
+
+  /**
+   * 언어 변경 popover 열기
+   */
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   /**
    * 매체, 관리자 탭 전환
@@ -75,10 +109,10 @@ const Header = ({ history, user, onLogout }) => {
   }
 
   return (
-    <header className={classes.header}>
+    <header className={clsx(classes.header, 'mb-Header')}>
       <div>
         <IconButton
-          className={classes.logoBtn}
+          className={classes.buttonMargin}
           onClick={goMain}
           color="primary"
         >
@@ -103,7 +137,35 @@ const Header = ({ history, user, onLogout }) => {
             </Button>
           </ButtonGroup>
         </Grid>
-        <div>
+        <div className={classes.flex}>
+          <Button
+            variant="contained"
+            className={classes.langBtn}
+            onClick={handleClick}
+          >
+            {t(locale)}
+            <ExpandMoreIcon className={classes.rightIcon} />
+          </Button>
+          <Popover
+            open={open}
+            anchorEl={anchorEl}
+            onClose={handleClose}
+            anchorOrigin={{
+              vertical: 'bottom',
+              horizontal: 'right'
+            }}
+            transformOrigin={{
+              vertical: 'top',
+              horizontal: 'right'
+            }}
+          >
+            <ListItem button onClick={() => changeLang('ko')}>
+              <ListItemText primary={t('ko')} />
+            </ListItem>
+            <ListItem button onClick={() => changeLang('en')}>
+              <ListItemText primary={t('en')} />
+            </ListItem>
+          </Popover>
           {user ? (
             <div className="right">
               <div>{user.username}</div>

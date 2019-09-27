@@ -65,12 +65,10 @@ const auth = handleActions(
       /**
        * 로그인 성공하면 auth 넣어주기
        */
-      const { data } = payload;
-
       return {
         ...state,
         authError: null,
-        user: data.data
+        user: payload.data
       };
     },
     [LOGIN_FAILURE]: (state, { payload: errorMessage }) => {

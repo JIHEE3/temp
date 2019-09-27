@@ -195,15 +195,22 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     width: '100%',
-    marginBottom: theme.spacing(2)
+    marginBottom: theme.spacing(2),
+    display: 'flex',
+    flexDirection: 'column'
   },
   table: {
     minWidth: 750
   },
   tableWrapper: {
-    // overflowX: 'auto'
-    overflow: 'auto'
-    // maxHeight:
+    overflow: 'auto',
+    // 임시
+    maxHeight: '693px',
+    display: 'flex',
+    flex: '1 0 auto',
+    '& > div': {
+      flex: '1 0 auto'
+    }
   },
   visuallyHidden: {
     border: 0,
@@ -223,6 +230,7 @@ export default function EnhancedTable({
   rows = [],
   error,
   loading,
+  dense,
   hasCheckbox = true
 }) {
   rows = !rows ? [] : rows;
@@ -272,6 +280,7 @@ export default function EnhancedTable({
 
   function handleChangePage(event, newPage) {
     setPage(newPage);
+    console.log(newPage);
   }
 
   function handleChangeRowsPerPage(event) {
@@ -293,101 +302,122 @@ export default function EnhancedTable({
       <Paper className={classes.paper}>
         <EnhancedTableToolbar numSelected={selected.length} />
         <div className={classes.tableWrapper}>
-          <Table
-            className={classes.table}
-            aria-labelledby="tableTitle"
-            // size={dense ? 'small' : 'medium'}
-            stickyHeader
-          >
-            <EnhancedTableHead
-              classes={classes}
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onSelectAllClick={handleSelectAllClick}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-              headCells={headCells}
-              hasCheckbox={hasCheckbox}
-            />
-            <TableBody>
-              {stableSort(rows, getSorting(order, orderBy))
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
-                  const labelId = `enhanced-table-checkbox-${index}`;
+          <div>
+            <Table
+              className={classes.table}
+              aria-labelledby="tableTitle"
+              size={dense ? 'small' : 'medium'}
+              stickyHeader
+            >
+              <EnhancedTableHead
+                classes={classes}
+                numSelected={selected.length}
+                order={order}
+                orderBy={orderBy}
+                onSelectAllClick={handleSelectAllClick}
+                onRequestSort={handleRequestSort}
+                rowCount={rows.length}
+                headCells={headCells}
+                hasCheckbox={hasCheckbox}
+              />
+              <TableBody>
+                {stableSort(rows, getSorting(order, orderBy))
+                  // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((row, index) => {
+                    const isItemSelected = isSelected(row.name);
+                    const labelId = `enhanced-table-checkbox-${index}`;
 
-                  const rowProps = !hasCheckbox
-                    ? {}
-                    : {
-                        onClick: event => handleClick(event, row.name),
-                        role: 'checkbox',
-                        'aria-checked': isItemSelected,
-                        selected: isItemSelected
-                      };
+                    const rowProps = !hasCheckbox
+                      ? {}
+                      : {
+                          onClick: event => handleClick(event, row.name),
+                          role: 'checkbox',
+                          'aria-checked': isItemSelected,
+                          selected: isItemSelected
+                        };
 
-                  const firstCellProps = !hasCheckbox
-                    ? {}
-                    : {
-                        component: 'th',
-                        id: { labelId },
-                        scope: 'row',
-                        padding: 'none'
-                      };
+                    const firstCellProps = !hasCheckbox
+                      ? {}
+                      : {
+                          component: 'th',
+                          id: { labelId },
+                          scope: 'row',
+                          padding: 'none'
+                        };
 
-                  return (
-                    <TableRow hover tabIndex={-1} key={row.name} {...rowProps}>
-                      {hasCheckbox ? (
-                        <TableCell padding="checkbox">
-                          <Checkbox
-                            checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
-                          />
-                        </TableCell>
+                    return (
+                      <TableRow hover tabIndex={-1} key={index} {...rowProps}>
+                        {hasCheckbox ? (
+                          <TableCell padding="checkbox">
+                            <Checkbox
+                              checked={isItemSelected}
+                              inputProps={{ 'aria-labelledby': labelId }}
+                            />
+                          </TableCell>
+                        ) : null}
+                        {(() => {
+                          const cell = [];
+                          for (let i = 0; i < headCells.length; i++) {
+                            const headCell = headCells[i];
+                            const align = headCell.numeric ? 'right' : 'left';
+                            if (typeof row[headCell.id] === 'undefined') {
+                              continue;
+                            }
+                            if (cell.length === 0) {
+                              // 첫번째 컬럼
+                              cell.push(
+                                <TableCell
+                                  key={headCell.id}
+                                  {...firstCellProps}
+                                  align={align}
+                                >
+                                  {row[headCell.id]}
+                                </TableCell>
+                              );
+                            } else {
+                              cell.push(
+                                <TableCell
+                                  key={headCell.id}
+                                  align="right"
+                                  align={align}
+                                >
+                                  {row[headCell.id]}
+                                </TableCell>
+                              );
+                            }
+                          }
+
+                          return cell;
+                        })()}
+                      </TableRow>
+                    );
+                  })}
+                {emptyRows > 0 && (
+                  <TableRow style={{ height: 49 * emptyRows }}>
+                    <TableCell colSpan={headCells.length + 1}>
+                      {loading ? (
+                        <>
+                          <Skeleton />
+                          <Skeleton width="60%" />
+                          <Skeleton />
+                          <Skeleton width="60%" />
+                          <Skeleton />
+                          <Skeleton width="60%" />
+                        </>
+                      ) : error ? (
+                        <>
+                          <WarningIcon color="error" fontSize="large" />
+                          Error
+                        </>
                       ) : null}
-                      {headCells.map((headCell, index) => {
-                        if (index === 0) {
-                          return (
-                            <TableCell key={headCell.id} {...firstCellProps}>
-                              {row[headCell.id]}
-                            </TableCell>
-                          );
-                        } else {
-                          return (
-                            <TableCell key={headCell.id} align="right">
-                              {row[headCell.id]}
-                            </TableCell>
-                          );
-                        }
-                      })}
-                    </TableRow>
-                  );
-                })}
-              {emptyRows > 0 && (
-                <TableRow style={{ height: 49 * emptyRows }}>
-                  <TableCell colSpan={headCells.length + 1}>
-                    {loading ? (
-                      <>
-                        <Skeleton />
-                        <Skeleton width="60%" />
-                        <Skeleton />
-                        <Skeleton width="60%" />
-                        <Skeleton />
-                        <Skeleton width="60%" />
-                      </>
-                    ) : error ? (
-                      <>
-                        <WarningIcon color="error" fontSize="large" />
-                        Error
-                      </>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
         </div>
-        <TablePagination
+        {/* <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
           count={rows.length}
@@ -401,7 +431,7 @@ export default function EnhancedTable({
           }}
           onChangePage={handleChangePage}
           onChangeRowsPerPage={handleChangeRowsPerPage}
-        />
+        /> */}
       </Paper>
       {/* <FormControlLabel
         control={<Switch checked={dense} onChange={handleChangeDense} />}
