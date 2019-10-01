@@ -43,7 +43,13 @@ const nestedListStyles = makeStyles(theme => ({
   },
   listItemWrap: {
     justifyContent: 'center',
-    position: 'relative'
+    position: 'relative',
+    borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+    // borderLeft: 'none',
+    // borderRight: 'none'
+    '&:last-child': {
+      borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
+    }
   },
   listTitle: {
     display: 'flex',
@@ -70,11 +76,12 @@ const nestedListStyles = makeStyles(theme => ({
   /**
    * 메뉴 숨김 보임 관련 끝
    */
-  paper: {
+  popoverPaper: {
     position: 'absolute',
     top: 36,
     width: '300px',
-    left: 0
+    left: 0,
+    zIndex: 10
   },
   icon: {
     minWidth: 'auto'
@@ -208,7 +215,7 @@ export default withRouter(function AdminNav(props) {
         { seq: '5-3', name: '키워드별 CPC관리', url: '/admin/test5' }
       ]
     },
-    { seq: '6', name: '여기 눌러봐요', url: '/admin/test6' },
+    { seq: '6', name: '여기', url: '/admin/test6' },
     { seq: '7', name: '사용자 관리', url: '/admin/test7' },
     {
       seq: '8',
@@ -284,7 +291,7 @@ export default withRouter(function AdminNav(props) {
 
     ReactDOM.render(
       <Paper
-        className={classes.paper}
+        className={clsx('mb-AdminNavPopover', classes.popoverPaper)}
         style={{
           top: popoverTop,
           left:
@@ -319,7 +326,6 @@ export default withRouter(function AdminNav(props) {
         >
           <Typography
             variant="h5"
-            gutterBottom
             className={clsx({ [classes.hide]: !navOpen })}
           >
             Mobon {t('관리자')}
@@ -333,7 +339,7 @@ export default withRouter(function AdminNav(props) {
           </div>
         </ListSubheader>
       }
-      className={classes.root}
+      className={clsx('mb-AdminNav', classes.root)}
     >
       {tempMenuList.map((menu, index) => {
         const open = openKeys[index];

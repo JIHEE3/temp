@@ -109,7 +109,7 @@ const Header = ({ history, user, locale, changeLang, onLogout }) => {
   }
 
   return (
-    <header className={clsx(classes.header, 'mb-Header')}>
+    <header className={clsx('mb-Header', classes.header)}>
       <div>
         <IconButton
           className={classes.buttonMargin}

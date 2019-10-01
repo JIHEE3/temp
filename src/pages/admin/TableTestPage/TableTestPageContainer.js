@@ -47,7 +47,7 @@ const TableTestPage = () => {
     adAPI
       .adcodeList()
       .then(response => {
-        setData(response);
+        setData(response.data);
       })
       .catch(error => {
         console.log(error);

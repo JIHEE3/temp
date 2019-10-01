@@ -1,28 +1,39 @@
-import { useState, useEffect } from 'react';
-
 /**
- *
- * @param {function} func
- * @param {} conditions
- * @return {JOSN} { data, isLoading, error }
+ * fetch header
+ * @param {function} func fetch 수행할 api
+ * @return {Promise}
  */
-export function useFetch(func, conditions = []) {
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(false);
-
-  const fetch = () => {
+export function fetchHeader(func) {
+  // get table headers
+  return new Promise((resolve, reject) => {
     func()
       .then(response => {
-        setData(response.data);
+        const { data } = response.data;
+        // 해더 셋팅
+        const headCells = data.map(head => {
+          const { id, label, orderFlag, type, format } = head;
+          return {
+            id,
+            label,
+            orderFlag,
+            numeric: type === 'number' ? true : false,
+            format
+          };
+        });
+        resolve(headCells);
       })
       .catch(error => {
-        console.log(error);
-        setError(true);
+        reject(error);
       });
-  };
+  });
+}
 
-  useEffect(fetch, conditions);
-
-  const isLoading = data == null;
-  return { data, isLoading, error };
+/**
+ * underbar -> camel
+ * @param {string} str
+ */
+export function under2camel(str) {
+  return str.toLowerCase().replace(/(_[a-z])/g, function(arg) {
+    return arg.toUpperCase().replace('_', '');
+  });
 }

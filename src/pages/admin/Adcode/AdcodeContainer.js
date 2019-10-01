@@ -44,14 +44,11 @@ const headCells = [
  */
 const AdcodeContainer = () => {
   const dispatch = useDispatch();
-  const { data, error, loading /*, user*/ } = useSelector(
-    ({ adcode, loading /*, user */ }) => ({
-      data: adcode.data,
-      error: adcode.error,
-      loading: loading[FETCH_ADCODE]
-      /*user: auth.user,*/
-    })
-  );
+  const { data, error, loading } = useSelector(({ adcode, loading }) => ({
+    data: adcode.data,
+    error: adcode.error,
+    loading: loading[FETCH_ADCODE]
+  }));
 
   useEffect(() => {
     const temp = {

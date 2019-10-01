@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
@@ -6,7 +6,7 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
-import TablePagination from '@material-ui/core/TablePagination';
+// import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -15,41 +15,18 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
+import LinearProgress from '@material-ui/core/LinearProgress';
+import CircularProgress from '@material-ui/core/CircularProgress';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
 // import Switch from '@material-ui/core/Switch';
 import Skeleton from '@material-ui/lab/Skeleton';
+import Snackbar from '@material-ui/core/Snackbar';
 
 import DeleteIcon from '@material-ui/icons/Delete';
 import WarningIcon from '@material-ui/icons/Warning';
 import FilterListIcon from '@material-ui/icons/FilterList';
 
-// 해당 orderBy key 값으로 순서 비교
-function desc(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-// api 로 테이블 정렬한다면 이 함수 필요 없을 듯
-function stableSort(array, cmp) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = cmp(a[0], b[0]);
-    if (order !== 0) return order;
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map(el => el[0]);
-}
-
-function getSorting(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => desc(a, b, orderBy)
-    : (a, b) => -desc(a, b, orderBy);
-}
+import SnackbarContentWrapper from 'components/molecules/Snackbar/SnackbarContentWrapper';
 
 function EnhancedTableHead(props) {
   const {
@@ -88,18 +65,24 @@ function EnhancedTableHead(props) {
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
-            <TableSortLabel
-              active={orderBy === headCell.id}
-              direction={order}
-              onClick={createSortHandler(headCell.id)}
-            >
-              {headCell.label}
-              {orderBy === headCell.id ? (
-                <span className={classes.visuallyHidden}>
-                  {order === 'desc' ? 'sorted descending' : 'sorted ascending'}
-                </span>
-              ) : null}
-            </TableSortLabel>
+            {headCell.orderFlag === true ? (
+              <TableSortLabel
+                active={orderBy === headCell.id}
+                direction={order}
+                onClick={createSortHandler(headCell.id)}
+              >
+                {headCell.label}
+                {orderBy === headCell.id ? (
+                  <span className={classes.visuallyHidden}>
+                    {order === 'desc'
+                      ? 'sorted descending'
+                      : 'sorted ascending'}
+                  </span>
+                ) : null}
+              </TableSortLabel>
+            ) : (
+              <>{headCell.label}</>
+            )}
           </TableCell>
         ))}
       </TableRow>
@@ -197,7 +180,8 @@ const useStyles = makeStyles(theme => ({
     width: '100%',
     marginBottom: theme.spacing(2),
     display: 'flex',
-    flexDirection: 'column'
+    flexDirection: 'column',
+    position: 'relative'
   },
   table: {
     minWidth: 750
@@ -205,11 +189,49 @@ const useStyles = makeStyles(theme => ({
   tableWrapper: {
     overflow: 'auto',
     // 임시
-    maxHeight: '693px',
+    maxHeight: '774px',
     display: 'flex',
     flex: '1 0 auto',
     '& > div': {
       flex: '1 0 auto'
+    }
+  },
+  loadingBar: {
+    position: 'absolute',
+    bottom: '0',
+    width: '100%',
+    display: 'none',
+    '&.loading': {
+      display: 'block'
+    }
+  },
+  progress: {
+    height: theme.spacing(1),
+    borderRadius: theme.shape.borderRadius,
+    margin: theme.spacing(3)
+  },
+  circularProgressWrap: {
+    height: '100%',
+    width: '100%',
+    position: 'absolute',
+    backgroundColor: 'rgba( 255, 255, 255, 0.7 )',
+    display: 'none',
+    '& > div': {
+      margin: 'auto'
+    },
+    '&.loading': {
+      display: 'flex'
+    }
+  },
+  errorWrap: {
+    display: 'flex',
+    position: 'absolute',
+    width: '100%',
+    '& div': {
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      margin: 'auto'
     }
   },
   visuallyHidden: {
@@ -230,24 +252,31 @@ export default function EnhancedTable({
   rows = [],
   error,
   loading,
+  page = 1,
   dense,
-  hasCheckbox = true
+  order = 'asc',
+  orderBy = '',
+  hasCheckbox = true,
+  fetchData = f => f,
+  handleRequestSort = f => f,
+  moreFetching = false
 }) {
   rows = !rows ? [] : rows;
   const classes = useStyles();
-  const [order, setOrder] = React.useState('asc');
-  const [orderBy, setOrderBy] = React.useState('calories');
   const [selected, setSelected] = React.useState([]);
-  const [page, setPage] = React.useState(0);
+  // const [page, setPage] = React.useState(0);
   // const [dense, setDense] = React.useState(false);
-  const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  // const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const scrollRef = React.createRef();
 
-  function handleRequestSort(event, property) {
-    const isDesc = orderBy === property && order === 'desc';
-    // 현재 sorting 키값 state 변경 & 정렬관련 api 요청하는 action dispatch 등 필요
-    setOrder(isDesc ? 'asc' : 'desc');
-    setOrderBy(property);
-  }
+  useEffect(() => {
+    if (page === 1 && !!scrollRef.current) {
+      // debugger;
+      // scrollRef.current.scrollTo(0, 0);
+      scrollRef.current.scrollTop = 0;
+      scrollRef.current.scrollLeft = 0;
+    }
+  }, [page, scrollRef]);
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
@@ -278,30 +307,57 @@ export default function EnhancedTable({
     setSelected(newSelected);
   }
 
-  function handleChangePage(event, newPage) {
-    setPage(newPage);
-    console.log(newPage);
-  }
-
-  function handleChangeRowsPerPage(event) {
-    setRowsPerPage(+event.target.value);
-    setPage(0);
-  }
+  // function handleChangeRowsPerPage(event) {
+  //   setRowsPerPage(+event.target.value);
+  //   // setPage(0);
+  // }
 
   // function handleChangeDense(event) {
   //   setDense(event.target.checked);
   // }
 
-  const isSelected = name => selected.indexOf(name) !== -1;
+  /**
+   * 무한 스크롤
+   */
+  function handleTableScroll(event) {
+    const { scrollHeight, scrollTop, clientHeight } = event.currentTarget;
+    if (
+      scrollTop !== 0 &&
+      scrollHeight - scrollTop < clientHeight + 100 &&
+      moreFetching === false
+    ) {
+      fetchData();
+    }
+  }
 
-  const emptyRows =
-    rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+  const isSelected = name => selected.indexOf(name) !== -1;
+  const open = page > 1 && error === true;
 
   return (
-    <div className={classes.root}>
+    <div className={clsx('mb-EnhancedTable', classes.root)}>
       <Paper className={classes.paper}>
+        <div
+          className={clsx(classes.loadingBar, {
+            loading: page !== 1 && moreFetching
+          })}
+        >
+          <LinearProgress className={classes.progress} />
+        </div>
+        <div
+          className={clsx(classes.circularProgressWrap, {
+            loading: page === 1 && moreFetching
+          })}
+        >
+          <div>
+            <CircularProgress className={classes.progress} />
+          </div>
+        </div>
         <EnhancedTableToolbar numSelected={selected.length} />
-        <div className={classes.tableWrapper}>
+        <div
+          className={classes.tableWrapper}
+          onScroll={handleTableScroll}
+          ref={scrollRef}
+        >
           <div>
             <Table
               className={classes.table}
@@ -321,96 +377,100 @@ export default function EnhancedTable({
                 hasCheckbox={hasCheckbox}
               />
               <TableBody>
-                {stableSort(rows, getSorting(order, orderBy))
-                  // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index) => {
-                    const isItemSelected = isSelected(row.name);
-                    const labelId = `enhanced-table-checkbox-${index}`;
+                {rows.map((row, index) => {
+                  const isItemSelected = isSelected(row.name);
+                  const labelId = `enhanced-table-checkbox-${index}`;
 
-                    const rowProps = !hasCheckbox
-                      ? {}
-                      : {
-                          onClick: event => handleClick(event, row.name),
-                          role: 'checkbox',
-                          'aria-checked': isItemSelected,
-                          selected: isItemSelected
-                        };
+                  const rowProps = !hasCheckbox
+                    ? {}
+                    : {
+                        onClick: event => handleClick(event, row.name),
+                        role: 'checkbox',
+                        'aria-checked': isItemSelected,
+                        selected: isItemSelected
+                      };
 
-                    const firstCellProps = !hasCheckbox
-                      ? {}
-                      : {
-                          component: 'th',
-                          id: { labelId },
-                          scope: 'row',
-                          padding: 'none'
-                        };
+                  const firstCellProps = !hasCheckbox
+                    ? {}
+                    : {
+                        component: 'th',
+                        id: { labelId },
+                        scope: 'row',
+                        padding: 'none'
+                      };
 
-                    return (
-                      <TableRow hover tabIndex={-1} key={index} {...rowProps}>
-                        {hasCheckbox ? (
-                          <TableCell padding="checkbox">
-                            <Checkbox
-                              checked={isItemSelected}
-                              inputProps={{ 'aria-labelledby': labelId }}
-                            />
-                          </TableCell>
-                        ) : null}
-                        {(() => {
-                          const cell = [];
-                          for (let i = 0; i < headCells.length; i++) {
-                            const headCell = headCells[i];
-                            const align = headCell.numeric ? 'right' : 'left';
-                            if (typeof row[headCell.id] === 'undefined') {
-                              continue;
-                            }
-                            if (cell.length === 0) {
-                              // 첫번째 컬럼
-                              cell.push(
-                                <TableCell
-                                  key={headCell.id}
-                                  {...firstCellProps}
-                                  align={align}
-                                >
-                                  {row[headCell.id]}
-                                </TableCell>
-                              );
-                            } else {
-                              cell.push(
-                                <TableCell
-                                  key={headCell.id}
-                                  align="right"
-                                  align={align}
-                                >
-                                  {row[headCell.id]}
-                                </TableCell>
-                              );
-                            }
-                          }
-
-                          return cell;
-                        })()}
-                      </TableRow>
-                    );
-                  })}
-                {emptyRows > 0 && (
-                  <TableRow style={{ height: 49 * emptyRows }}>
-                    <TableCell colSpan={headCells.length + 1}>
-                      {loading ? (
-                        <>
-                          <Skeleton />
-                          <Skeleton width="60%" />
-                          <Skeleton />
-                          <Skeleton width="60%" />
-                          <Skeleton />
-                          <Skeleton width="60%" />
-                        </>
-                      ) : error ? (
-                        <>
-                          <WarningIcon color="error" fontSize="large" />
-                          Error
-                        </>
+                  return (
+                    <TableRow hover tabIndex={-1} key={index} {...rowProps}>
+                      {hasCheckbox ? (
+                        <TableCell padding="checkbox">
+                          <Checkbox
+                            checked={isItemSelected}
+                            inputProps={{ 'aria-labelledby': labelId }}
+                          />
+                        </TableCell>
                       ) : null}
-                    </TableCell>
+                      {(() => {
+                        const cell = [];
+                        for (let i = 0; i < headCells.length; i++) {
+                          const headCell = headCells[i];
+                          const align = headCell.numeric ? 'right' : 'left';
+                          if (typeof row[headCell.id] === 'undefined') {
+                            continue;
+                          }
+                          if (cell.length === 0) {
+                            // 첫번째 컬럼
+                            cell.push(
+                              <TableCell
+                                key={headCell.id}
+                                {...firstCellProps}
+                                align={align}
+                              >
+                                {row[headCell.id]}
+                              </TableCell>
+                            );
+                          } else {
+                            cell.push(
+                              <TableCell key={headCell.id} align={align}>
+                                {row[headCell.id]}
+                              </TableCell>
+                            );
+                          }
+                        }
+                        return cell;
+                      })()}
+                    </TableRow>
+                  );
+                })}
+                {rows.length < 5 && (
+                  <TableRow style={{ height: 49 * 5 }}>
+                    {page <= 1 && (loading || error || rows.length === 0) && (
+                      <TableCell colSpan={headCells.length + 1}>
+                        {loading ? (
+                          <>
+                            <Skeleton />
+                            <Skeleton width="60%" />
+                            <Skeleton />
+                            <Skeleton width="60%" />
+                            <Skeleton />
+                            <Skeleton width="60%" />
+                          </>
+                        ) : error ? (
+                          <div className={classes.errorWrap}>
+                            <div>
+                              <WarningIcon color="error" fontSize="large" />
+                              <div>Error</div>
+                            </div>
+                          </div>
+                        ) : rows.length === 0 ? (
+                          <div className={classes.errorWrap}>
+                            <div>
+                              <WarningIcon fontSize="large" />
+                              <div>No Data</div>
+                            </div>
+                          </div>
+                        ) : null}
+                      </TableCell>
+                    )}
                   </TableRow>
                 )}
               </TableBody>
@@ -437,6 +497,21 @@ export default function EnhancedTable({
         control={<Switch checked={dense} onChange={handleChangeDense} />}
         label='Dense padding'
       /> */}
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={open}
+        autoHideDuration={6000}
+        // onClose={handleClose}
+      >
+        <SnackbarContentWrapper
+          // onClose={handleClose}
+          variant="warning"
+          message="warning"
+        />
+      </Snackbar>
     </div>
   );
 }

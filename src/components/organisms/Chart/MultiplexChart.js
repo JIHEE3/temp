@@ -13,7 +13,6 @@ import {
 } from 'recharts';
 import Paper from '@material-ui/core/Paper';
 import { withStyles } from '@material-ui/styles';
-import { makeStyles } from '@material-ui/core/styles';
 
 const data = [
   {
@@ -54,14 +53,11 @@ const data = [
   }
 ];
 
-// const styles = makeStyles(theme => ({
-const styles = {
+const styles = theme => ({
   root: {
-    // marginTop: theme.spacing(3)
-    marginTop: '24px'
+    marginTop: theme.spacing(3)
   }
-};
-// }));
+});
 
 export default withStyles(styles)(
   class MultiplexChart extends PureComponent {

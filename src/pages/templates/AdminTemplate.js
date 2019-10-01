@@ -26,7 +26,8 @@ const adminTemplateStyles = makeStyles(theme => ({
       left: theme.spacing(9) + 1
     },
     right: 0,
-    overflow: 'auto',
+    // overflow: 'auto',
+    overflowX: 'hidden',
     '&.navOpen': {
       left: drawerWidth
     },
@@ -38,6 +39,7 @@ const adminTemplateStyles = makeStyles(theme => ({
     }
   },
   drawer: {
+    boxShadow: '3.5px 3.5px 5px 0 rgba(0, 0, 0, 0.1)',
     width: drawerWidth,
     flexShrink: 0,
     whiteSpace: 'nowrap',
@@ -81,7 +83,7 @@ const AdminTemplate = ({ children }) => {
   }
 
   return (
-    <div className={classes.root}>
+    <div className={clsx('mb-AdminTemplate', classes.root)}>
       <HeaderContainer />
       <Drawer
         variant="permanent"
