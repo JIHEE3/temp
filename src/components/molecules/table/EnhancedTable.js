@@ -271,8 +271,6 @@ export default function EnhancedTable({
 
   useEffect(() => {
     if (page === 1 && !!scrollRef.current) {
-      // debugger;
-      // scrollRef.current.scrollTo(0, 0);
       scrollRef.current.scrollTop = 0;
       scrollRef.current.scrollLeft = 0;
     }

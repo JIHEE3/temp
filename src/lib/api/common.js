@@ -7,6 +7,11 @@ import client from './client';
 export const setLocale = locale => client.get(`/api/locale/${locale}`);
 
 /**
+ * get 메뉴
+ */
+export const menuList = () => client.get(`/api/manage/auth/navMenu`);
+
+/**
  * 통계페이지별 테이블 headr
  * @param {string} url 페이지 url
  */

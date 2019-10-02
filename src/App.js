@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 // import './App.css';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+import { Route, Switch, withRouter } from 'react-router-dom';
 import { createMuiTheme } from '@material-ui/core/styles';
 import {
   ThemeProvider,
@@ -11,9 +12,8 @@ import { indigo, deepPurple } from '@material-ui/core/colors';
 
 import Join from 'pages/join/Join/Join';
 import LoginFormContainer from 'pages/login/LoginForm/LoginFormContainer';
-import AdcodeContainer from 'pages/admin/Adcode/AdcodeContainer';
+import AdminTemplate from 'pages/templates/AdminTemplate';
 import StatisticsContainer from 'pages/admin/Statistics/StatisticsContainer';
-import ChartTestPageContainer from 'pages/admin/ChartTestPage/ChartTestPageContainer';
 import TableTestPageContainer from 'pages/admin/TableTestPage/TableTestPageContainer';
 import TableTestPage2Container from 'pages/admin/TableTestPage2/TableTestPage2Container';
 
@@ -48,8 +48,24 @@ const theme = createMuiTheme({
 /**
  * 페이지 라우팅
  */
-function App() {
+function App(props) {
   console.dir(theme);
+  const { history } = props;
+  const { menu } = useSelector(({ menu }) => ({
+    menu: menu.list
+  }));
+
+  useEffect(() => {
+    if (!!menu) {
+      let curUrl = menu[0].menuUrl;
+      if (curUrl === null) {
+        curUrl = menu[0].subMenu[0].menuUrl;
+      }
+
+      history.push(curUrl);
+    }
+  }, [menu, history]);
+
   return (
     <div
       style={{ display: 'flex', justifyContent: 'center', overflow: 'hidden' }}
@@ -65,18 +81,13 @@ function App() {
             />
             {/* 가입 */}
             <Route path="/join" component={Join} />
-            {/* 관리자 */}
-            <Route path="/admin/management" component={AdcodeContainer} />
-            <Route path="/admin/test" component={ChartTestPageContainer} />
-            <Route path="/admin/tes1" component={TableTestPageContainer} />
-            <Route path="/admin/test6" component={TableTestPage2Container} />
-            <Route path="/admin/statistics" component={StatisticsContainer} />
-            <Route path="/admin/admix" render={() => `애드익스(외부연동)`} />
-            <Route path="/admin/mediaLive" render={() => `광고송출리스트`} />
-            <Route path="/admin/checkImg" render={() => `이미지검수`} />
-            <Route path="/admin/etc" render={() => `기타`} />
-            <Route path="/admin/RTB" render={() => `RTB`} />
-            <Redirect exact from="/" to="/admin/management" />
+            {/* 매인 */}
+            <Route exact path="/" component={AdminTemplate} />
+            <Route path="/user" component={TableTestPage2Container} />
+            <Route path="/realtime" component={TableTestPageContainer} />
+            <Route path="/productInfoList" component={StatisticsContainer} />
+            <Route path="/test" render={() => `url이 test로 모두 겹침`} />
+
             {/* 매체 */}
             <Route
               path="/media"
@@ -91,4 +102,4 @@ function App() {
   );
 }
 
-export default App;
+export default withRouter(App);

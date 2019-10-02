@@ -14,6 +14,7 @@ import { composeWithDevTools } from 'redux-devtools-extension';
 import createSagaMiddleware from 'redux-saga';
 import rootReducer, { rootSaga } from 'modules';
 import { setUser } from 'modules/auth';
+import { getMenu } from 'modules/menu';
 import { initializeLocale } from 'modules/locale';
 // import { tempSetUser, check } from 'modules/user';
 import { setLocale } from 'lib/api/common';
@@ -30,7 +31,6 @@ function loadUser() {
     if (!user) return; // 로그인 상태가 아니라면 아무것도 안함
 
     store.dispatch(setUser(user));
-
     // store.dispatch(tempSetUser(user));
     // store.dispatch(check());
   } catch (e) {
@@ -47,6 +47,7 @@ loadUser();
 setLocale(i18n.language)
   .then(response => {
     store.dispatch(initializeLocale(i18n.language));
+    store.dispatch(getMenu());
   })
   .catch(error => {
     console.log(error);

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useSelector } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { withRouter } from 'react-router-dom';
@@ -13,6 +14,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+import Skeleton from '@material-ui/lab/Skeleton';
+
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import DraftsIcon from '@material-ui/icons/Drafts';
 import SendIcon from '@material-ui/icons/Send';
@@ -21,6 +25,8 @@ import ExpandMore from '@material-ui/icons/ExpandMore';
 import FilterHdrIcon from '@material-ui/icons/FilterHdr';
 import CloseIcon from '@material-ui/icons/Close';
 import DehazeIcon from '@material-ui/icons/Dehaze';
+
+import { MENU } from 'modules/menu';
 
 const nestedListStyles = makeStyles(theme => ({
   root: {
@@ -45,8 +51,6 @@ const nestedListStyles = makeStyles(theme => ({
     justifyContent: 'center',
     position: 'relative',
     borderTop: '1px solid rgba(0, 0, 0, 0.12)',
-    // borderLeft: 'none',
-    // borderRight: 'none'
     '&:last-child': {
       borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
     }
@@ -91,6 +95,9 @@ const nestedListStyles = makeStyles(theme => ({
   },
   margenR0: {
     marginRight: 0
+  },
+  loadingWrap: {
+    margin: `${theme.spacing(1)}%`
   }
 }));
 
@@ -100,6 +107,11 @@ const subMenuStyles = makeStyles(theme => ({
   },
   nested: {
     paddingLeft: theme.spacing(6)
+  },
+  ellipsis: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
   }
 }));
 
@@ -126,23 +138,26 @@ function SubMenu(props) {
     <Collapse in={open} timeout="auto" unmountOnExit className={className}>
       <List component="div" disablePadding className={classes.listWrap}>
         {menuList.map(menu => {
-          const { seq, url, name } = menu;
+          const { menuSeq, menuUrl, menuNm } = menu;
           if (!openHighMenu) {
-            openHighMenu = curTab === url && !open;
+            openHighMenu = curTab === menuUrl && !open;
           }
 
           return (
-            <ListItem
-              button
-              key={seq}
-              className={clsx(classes.nested, { selected: curTab === url })}
-              onClick={event => handleClick({ event, url })}
-            >
-              {/* <ListItemIcon>
-                <StarBorder />
-              </ListItemIcon> */}
-              <ListItemText primary={name} />
-            </ListItem>
+            <Tooltip key={menuSeq} title={menuNm} placement="right">
+              <ListItem
+                button
+                className={clsx(classes.nested, {
+                  selected: curTab === menuUrl
+                })}
+                onClick={event => handleClick({ event, menuUrl })}
+              >
+                {/* <ListItemIcon>
+                  <StarBorder />
+                </ListItemIcon> */}
+                <ListItemText className={classes.ellipsis} primary={menuNm} />
+              </ListItem>
+            </Tooltip>
           );
         })}
       </List>
@@ -160,8 +175,13 @@ const menuPopoverId = 'menu-popover';
 export default withRouter(function AdminNav(props) {
   const { t } = useTranslation();
   const { history, location, navOpen, handleDrawerToggle } = props;
-  const { pathname = '/admin/management' } = location;
+  const { pathname } = location;
   const classes = nestedListStyles();
+  const { menu, loading } = useSelector(({ menu, loading }) => ({
+    menu: menu.list,
+    loading: loading[MENU]
+  }));
+
   // status
   const [openKeys, setOpenKeys] = useState([true]);
   const [curTab, setCurTab] = useState(pathname);
@@ -169,64 +189,6 @@ export default withRouter(function AdminNav(props) {
   useEffect(() => {
     setCurTab(pathname);
   }, [pathname]);
-
-  // useSelector로 메뉴 리스트 받아오기 **아래는 임시**
-  const tempMenuList = [
-    {
-      seq: '1',
-      name: '광고 관리',
-      icon: 'DraftsIcon',
-      subMenu: [
-        { seq: '1-1', name: '개요', url: '/admin/management' },
-        { seq: '1-2', name: '캠페인 등록하기', url: '/admin/test' },
-        { seq: '1-3', name: '광고 상세 관리', url: '/admin/tes1' }
-      ]
-    },
-    {
-      seq: '2',
-      name: '키워드 센터',
-      icon: 'SendIcon',
-      subMenu: [
-        { seq: '2-1', name: '대시보드', url: '/admin/statistics' },
-        { seq: '2-2', name: '키워드 관리', url: '/admin/tes2' }
-      ]
-    },
-    {
-      seq: '3',
-      name: '상품 관리',
-      icon: 'InboxIcon',
-      subMenu: [{ seq: '3-1', name: '상품 카테고리 관리', url: '/admin/admix' }]
-    },
-    {
-      seq: '4',
-      name: '보고서',
-      subMenu: [
-        { seq: '4-1', name: '개요', url: '/admin/mediaLive' },
-        { seq: '4-2', name: '일자별 보고서', url: '/admin/test3' },
-        { seq: '4-3', name: '시간대별 보고서', url: '/admin/RTB' }
-      ]
-    },
-    {
-      seq: '5',
-      name: '소셜링크 보고서',
-      subMenu: [
-        { seq: '5-1', name: '키워드그룹별 보고서', url: '/admin/checkImg' },
-        { seq: '5-2', name: '키워드별 보고서', url: '/admin/test4' },
-        { seq: '5-3', name: '키워드별 CPC관리', url: '/admin/test5' }
-      ]
-    },
-    { seq: '6', name: '여기', url: '/admin/test6' },
-    { seq: '7', name: '사용자 관리', url: '/admin/test7' },
-    {
-      seq: '8',
-      name: '시스템 관리',
-      subMenu: [
-        { seq: '8-1', name: '그룹 관리', url: '/admin/etc' },
-        { seq: '8-2', name: '메뉴 관리', url: '/admin/test8' },
-        { seq: '8-3', name: '항목명 관리', url: '/admin/test9' }
-      ]
-    }
-  ];
 
   /**
    * 상위 메뉴 오픈
@@ -240,14 +202,16 @@ export default withRouter(function AdminNav(props) {
   /**
    * nav 메뉴 클릭
    */
-  function handleClick({ event, index, hasSubMenu, url }) {
+  function handleClick({ event, index, hasSubMenu, menuUrl }) {
     event.stopPropagation();
     if (hasSubMenu) {
       if (navOpen) {
         openHighMenu(index);
       }
     } else {
-      history.push(url);
+      if (!!menuUrl) {
+        history.push(menuUrl);
+      }
     }
   }
 
@@ -302,7 +266,7 @@ export default withRouter(function AdminNav(props) {
       >
         {textContent}
         {subMenu.map(menu => (
-          <div key={menu.seq}>{menu.name}</div>
+          <div key={menu.menuSeq}>{menu.menuNm}</div>
         ))}
       </Paper>,
       document.getElementById(menuPopoverId)
@@ -316,6 +280,7 @@ export default withRouter(function AdminNav(props) {
 
   return (
     <List
+      className={clsx('mb-AdminNav', classes.root)}
       component="nav"
       aria-labelledby="nested-list-subheader"
       subheader={
@@ -339,66 +304,80 @@ export default withRouter(function AdminNav(props) {
           </div>
         </ListSubheader>
       }
-      className={clsx('mb-AdminNav', classes.root)}
     >
-      {tempMenuList.map((menu, index) => {
-        const open = openKeys[index];
-        const { seq, subMenu, icon, url } = menu;
-        const hasSubMenu = !!subMenu;
+      {loading ? (
+        <div className={classes.loadingWrap}>
+          <Skeleton />
+          <Skeleton width="60%" />
+          <Skeleton />
+          <Skeleton width="60%" />
+          <Skeleton />
+          <Skeleton width="60%" />
+        </div>
+      ) : (
+        menu.map((menu, index) => {
+          const open = openKeys[index];
+          const { menuSeq, menuNm, subMenu, icon, menuUrl } = menu;
+          const hasSubMenu = !!subMenu;
 
-        return (
-          <React.Fragment key={seq}>
-            <ListItem
-              button
-              onClick={event => handleClick({ event, index, hasSubMenu, url })}
-              onMouseEnter={
-                !navOpen ? event => handlePopoverOpen({ event, subMenu }) : null
-              }
-              onMouseLeave={!navOpen ? handlePopoverClose : null}
-              className={clsx(classes.listItemWrap, {
-                selected: curTab === url
-              })}
-            >
-              <ListItemIcon className={classes.icon}>
-                {(() => {
-                  let Icon = <FilterHdrIcon />;
-                  switch (icon) {
-                    case 'SendIcon':
-                      Icon = <SendIcon />;
-                      break;
-                    case 'DraftsIcon':
-                      Icon = <DraftsIcon />;
-                      break;
-                    case 'InboxIcon':
-                      Icon = <InboxIcon />;
-                      break;
-                    default:
-                      break;
-                  }
-                  return Icon;
-                })()}
-              </ListItemIcon>
-
-              <div
-                className={clsx(classes.listTitle, {
-                  [classes.hide]: !navOpen
+          return (
+            <React.Fragment key={menuSeq}>
+              <ListItem
+                button
+                onClick={event =>
+                  handleClick({ event, index, hasSubMenu, menuUrl })
+                }
+                onMouseEnter={
+                  !navOpen
+                    ? event => handlePopoverOpen({ event, subMenu })
+                    : null
+                }
+                onMouseLeave={!navOpen ? handlePopoverClose : null}
+                className={clsx(classes.listItemWrap, {
+                  selected: curTab === menuUrl
                 })}
               >
-                <ListItemText primary={menu.name} />
-                {hasSubMenu ? open ? <ExpandLess /> : <ExpandMore /> : null}
-              </div>
-            </ListItem>
-            <SubMenu
-              menuList={subMenu}
-              open={open}
-              handleClick={handleClick}
-              curTab={curTab}
-              openHighMenuCallBack={() => openHighMenu(index)}
-              className={clsx({ [classes.hide]: !navOpen })}
-            />
-          </React.Fragment>
-        );
-      })}
+                <ListItemIcon className={classes.icon}>
+                  {(() => {
+                    let Icon = <FilterHdrIcon />;
+                    switch (icon) {
+                      case 'SendIcon':
+                        Icon = <SendIcon />;
+                        break;
+                      case 'DraftsIcon':
+                        Icon = <DraftsIcon />;
+                        break;
+                      case 'InboxIcon':
+                        Icon = <InboxIcon />;
+                        break;
+                      default:
+                        break;
+                    }
+                    return Icon;
+                  })()}
+                </ListItemIcon>
+
+                <div
+                  className={clsx(classes.listTitle, {
+                    [classes.hide]: !navOpen
+                  })}
+                >
+                  <ListItemText primary={menuNm} />
+                  {hasSubMenu ? open ? <ExpandLess /> : <ExpandMore /> : null}
+                </div>
+              </ListItem>
+              <SubMenu
+                menuList={subMenu}
+                open={open}
+                handleClick={handleClick}
+                curTab={curTab}
+                openHighMenuCallBack={() => openHighMenu(index)}
+                className={clsx({ [classes.hide]: !navOpen })}
+              />
+            </React.Fragment>
+          );
+        })
+      )}
     </List>
   );
 });

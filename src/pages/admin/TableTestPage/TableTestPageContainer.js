@@ -64,7 +64,7 @@ const TableTestPage = () => {
         error={error}
         loading={loading}
         headCells={headCells}
-        hasCheckbox={false}
+        hasCheckbox={true}
       />
     </AdminTemplate>
   );
