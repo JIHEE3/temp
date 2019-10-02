@@ -49,7 +49,7 @@ function EnhancedTableHead(props) {
     <TableHead>
       <TableRow>
         {hasCheckbox ? (
-          <TableCell padding="checkbox">
+          <TableCell padding="checkbox" style={{ zIndex: 10 }}>
             <Checkbox
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={!!numSelected && numSelected === rowCount}
@@ -61,6 +61,7 @@ function EnhancedTableHead(props) {
         {headCells.map(headCell => (
           <TableCell
             key={headCell.id}
+            style={{ zIndex: 11 }}
             align={headCell.numeric ? 'right' : 'left'}
             padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
@@ -278,7 +279,7 @@ export default function EnhancedTable({
 
   function handleSelectAllClick(event) {
     if (event.target.checked) {
-      const newSelecteds = rows.map(n => n.name);
+      const newSelecteds = rows.map((n, index) => index);
       setSelected(newSelecteds);
       return;
     }
@@ -328,7 +329,7 @@ export default function EnhancedTable({
     }
   }
 
-  const isSelected = name => selected.indexOf(name) !== -1;
+  const isSelected = key => selected.indexOf(key) !== -1;
   const open = page > 1 && error === true;
 
   return (
@@ -376,13 +377,13 @@ export default function EnhancedTable({
               />
               <TableBody>
                 {rows.map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
+                  const isItemSelected = isSelected(index);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   const rowProps = !hasCheckbox
                     ? {}
                     : {
-                        onClick: event => handleClick(event, row.name),
+                        onClick: event => handleClick(event, index),
                         role: 'checkbox',
                         'aria-checked': isItemSelected,
                         selected: isItemSelected

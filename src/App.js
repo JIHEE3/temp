@@ -66,7 +66,7 @@ function App(props) {
         history.push(curUrl);
       }
     }
-  }, [menu, history]);
+  }, [menu, history, location]);
 
   return (
     <div

@@ -89,7 +89,8 @@ const TableTestPage2 = () => {
         loading={isLoading}
         page={page}
         headCells={headCells}
-        hasCheckbox={false}
+        // hasCheckbox={false}
+        hasCheckbox={true}
         dense={true}
         order={order}
         orderBy={orderBy}

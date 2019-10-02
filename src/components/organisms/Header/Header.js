@@ -11,11 +11,12 @@ import Button from '@material-ui/core/Button';
 import Popover from '@material-ui/core/Popover';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import EditIcon from '@material-ui/icons/Edit';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 import PaymentIcon from '@material-ui/icons/Payment';
-import AccessibilityNewIcon from '@material-ui/icons/AccessibilityNew';
+import AppleIcon from '@material-ui/icons/Apple';
 import HomeIcon from '@material-ui/icons/Home';
 import WhatshotIcon from '@material-ui/icons/Whatshot';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
@@ -110,13 +111,9 @@ const Header = ({ history, user, locale, changeLang, onLogout }) => {
 
   return (
     <header className={clsx('mb-Header', classes.header)}>
-      <div>
-        <IconButton
-          className={classes.buttonMargin}
-          onClick={goMain}
-          color="primary"
-        >
-          <AccessibilityNewIcon color="primary" fontSize="large" />
+      <div className={classes.flex}>
+        <IconButton onClick={goMain} color="primary">
+          <AppleIcon color="primary" fontSize="large" />
         </IconButton>
       </div>
 
@@ -185,15 +182,17 @@ const Header = ({ history, user, locale, changeLang, onLogout }) => {
               >
                 <EditIcon />
               </Fab>
-              <Fab
-                color="secondary"
-                onClick={onLogout}
-                aria-label="Logout"
-                className={classes.fab}
-                size="small"
-              >
-                <ExitToAppIcon />
-              </Fab>
+              <Tooltip title="Logout">
+                <Fab
+                  color="secondary"
+                  onClick={onLogout}
+                  aria-label="Logout"
+                  className={classes.fab}
+                  size="small"
+                >
+                  <ExitToAppIcon />
+                </Fab>
+              </Tooltip>
             </div>
           ) : (
             <div className="right">
