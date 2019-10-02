@@ -50,7 +50,7 @@ const theme = createMuiTheme({
  */
 function App(props) {
   console.dir(theme);
-  const { history } = props;
+  const { history, location } = props;
   const { menu } = useSelector(({ menu }) => ({
     menu: menu.list
   }));
@@ -61,8 +61,10 @@ function App(props) {
       if (curUrl === null) {
         curUrl = menu[0].subMenu[0].menuUrl;
       }
-
-      history.push(curUrl);
+      if (location.pathname === '/') {
+        // path를 입력하지 않은경우 메뉴의 첫페이지 보여줌
+        history.push(curUrl);
+      }
     }
   }, [menu, history]);
 

@@ -13,7 +13,7 @@ const adminTemplateStyles = makeStyles(theme => ({
     flexGrow: 1
   },
   content: {
-    transitionDuration: '0.4s',
+    transitionDuration: '0.3s',
     // position: 'fixed',
     // height: '500px',
     position: 'absolute',
@@ -74,12 +74,15 @@ const adminTemplateStyles = makeStyles(theme => ({
   }
 }));
 
+let navOpenVal = true;
+
 const AdminTemplate = ({ children }) => {
   const classes = adminTemplateStyles();
-  const [navOpen, setNavOpen] = React.useState(true);
+  const [navOpen, setNavOpen] = React.useState(navOpenVal);
 
   function handleDrawerToggle() {
-    setNavOpen(!navOpen);
+    navOpenVal = !navOpen;
+    setNavOpen(navOpenVal);
   }
 
   return (

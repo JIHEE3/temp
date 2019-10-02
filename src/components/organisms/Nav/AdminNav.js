@@ -35,7 +35,7 @@ const nestedListStyles = makeStyles(theme => ({
     backgroundColor: theme.palette.background.paper,
     overflowX: 'hidden',
     '& .selected': {
-      color: '#fff',
+      color: theme.palette.common.white,
       backgroundColor: theme.palette.primary.main
     }
   },
@@ -82,10 +82,13 @@ const nestedListStyles = makeStyles(theme => ({
    */
   popoverPaper: {
     position: 'absolute',
-    top: 36,
     width: '300px',
-    left: 0,
-    zIndex: 10
+    zIndex: 10,
+    borderRadius: 0,
+    boxShadow: theme.shadows[3]
+  },
+  subMenuTitle: {
+    margin: theme.spacing(1, 1, 0, 1)
   },
   icon: {
     minWidth: 'auto'
@@ -98,6 +101,13 @@ const nestedListStyles = makeStyles(theme => ({
   },
   loadingWrap: {
     margin: `${theme.spacing(1)}%`
+  },
+  popoverSelected: {
+    color: theme.palette.common.white,
+    backgroundColor: theme.palette.grey[600],
+    '&:hover': {
+      backgroundColor: theme.palette.grey[600]
+    }
   }
 }));
 
@@ -200,7 +210,8 @@ export default withRouter(function AdminNav(props) {
   }
 
   /**
-   * nav 메뉴 클릭
+   *
+   * @param {json} param0 { event, index, hasSubMenu, menuUrl }
    */
   function handleClick({ event, index, hasSubMenu, menuUrl }) {
     event.stopPropagation();
@@ -210,72 +221,136 @@ export default withRouter(function AdminNav(props) {
       }
     } else {
       if (!!menuUrl) {
-        history.push(menuUrl);
+        if (menuUrl !== curTab) {
+          history.push(menuUrl);
+        }
       }
     }
   }
 
-  function handlePopoverOpen({ event, subMenu = [] }) {
+  /**
+   * sidebar menu 닫았을 때 보여질 submenu list popover
+   * @param {json} param0 {event, subMenu}
+   */
+  async function handlePopoverOpen({ event, subMenu = [] }) {
     event.stopPropagation();
     const { currentTarget } = event;
     const {
-      offsetTop,
-      offsetLeft,
-      offsetWidth,
+      offsetTop: targetTop,
+      offsetLeft: targetLeft,
+      offsetWidth: targetWidth,
+      offsetHeight: targetHeight,
       textContent,
       parentElement
     } = currentTarget;
     const headerHeight = 70;
-    const popoverParentEl = document.getElementById(menuPopoverId);
+    let popoverParentEl = document.getElementById(menuPopoverId);
     // popover 보여질 위치
-    let popoverTop = offsetTop + headerHeight - parentElement.scrollTop;
-    let popContent = popoverParentEl && popoverParentEl.firstChild;
+    const curTargetTop = targetTop + headerHeight - parentElement.scrollTop;
+    let popoverTop = curTargetTop;
+
+    const popoverStyle = {
+      top: popoverTop,
+      left:
+        targetLeft +
+        targetWidth +
+        (parentElement.offsetWidth - parentElement.clientWidth)
+    };
 
     if (popoverParentEl === null) {
       var popover = document.createElement('div');
       popover.setAttribute('id', menuPopoverId);
       document.getElementById('root').appendChild(popover);
+      popoverParentEl = document.getElementById(menuPopoverId);
     } else {
       popoverParentEl.style.display = 'block';
     }
 
-    // popover 가 window 벗어날 경우 벗어나지 않도록 위치 조정
-    if (popContent) {
-      if (popoverTop + popContent.offsetHeight > window.innerHeight) {
-        popoverTop =
-          popoverTop - popContent.offsetHeight + currentTarget.offsetHeight;
-      }
-
-      if (popoverTop + popContent.offsetHeight > window.innerHeight) {
-        popoverTop =
-          popoverTop -
-          (popoverTop + popContent.offsetHeight - window.innerHeight);
-      }
-    }
-
-    ReactDOM.render(
+    await ReactDOM.render(
       <Paper
         className={clsx('mb-AdminNavPopover', classes.popoverPaper)}
-        style={{
-          top: popoverTop,
-          left:
-            offsetLeft +
-            offsetWidth +
-            (parentElement.offsetWidth - parentElement.clientWidth)
+        style={{ ...popoverStyle }}
+        onMouseEnter={() => {
+          popoverParentEl.style.display = 'block';
+        }}
+        onMouseLeave={() => {
+          popoverParentEl.style.display = 'none';
         }}
       >
-        {textContent}
-        {subMenu.map(menu => (
-          <div key={menu.menuSeq}>{menu.menuNm}</div>
-        ))}
+        <Typography className={classes.subMenuTitle} variant="h6">
+          {textContent}
+        </Typography>
+        <List dense={true}>
+          {subMenu.map(menu => {
+            const { menuSeq, menuNm, menuUrl } = menu;
+            return (
+              <ListItem
+                key={menuSeq}
+                className={clsx({
+                  [classes.popoverSelected]: curTab === menuUrl
+                })}
+                button
+                onClick={event => {
+                  handleClick({ event, menuUrl });
+                  handlePopoverClose(event);
+                }}
+              >
+                <ListItemText primary={menuNm} />
+              </ListItem>
+            );
+          })}
+        </List>
       </Paper>,
-      document.getElementById(menuPopoverId)
+      popoverParentEl
     );
+
+    let popContent = popoverParentEl && popoverParentEl.firstChild;
+    // popover 가 window 벗어날 경우 벗어나지 않도록 위치 조정
+    if (popContent) {
+      const winH = window.innerHeight;
+
+      // 팝오버 내용을 target bottom 에 맞췄을때 화면 밖으로 나가는 경우 window 바닥에 붙어서 보이도록 위치 조정
+      if (targetTop + targetHeight + headerHeight > winH) {
+        popoverTop = winH - popContent.offsetHeight;
+      }
+
+      // 팝오버 내용이 화면 밖으로 나가는 경우 target bottom에 맞춰서 위로 나오게 위치 조정
+      if (popoverTop + popContent.offsetHeight > winH) {
+        popoverTop = popoverTop - popContent.offsetHeight + targetHeight;
+      }
+
+      // 내용이 너무 커서 화면 밖으로 벗어나는 경우
+      if (popoverTop < 0) {
+        if (curTargetTop < parseInt(winH / 2)) {
+          popoverTop = curTargetTop;
+        } else {
+          popoverTop = curTargetTop - (parseInt(winH / 2) - 20) + targetHeight;
+        }
+        popoverStyle['maxHeight'] = parseInt(winH / 2) - 20;
+        popoverStyle['overflow'] = 'auto';
+      }
+
+      popoverStyle['top'] = popoverTop;
+    }
+
+    popContent.removeAttribute('style');
+    for (let item in popoverStyle) {
+      if (popoverStyle.hasOwnProperty(item)) {
+        const suffix = isNaN(popoverStyle[item]) ? '' : 'px';
+        popContent.style[item] = `${popoverStyle[item]}${suffix}`;
+      }
+    }
   }
 
+  /**
+   * submenu popover 닫아주는 함수
+   * @param {event} event
+   */
   function handlePopoverClose(event) {
     event.stopPropagation();
-    document.getElementById(menuPopoverId).style.display = 'none';
+    if (!!document.getElementById(menuPopoverId)) {
+      document.getElementById(menuPopoverId).style.display = 'none';
+    }
   }
 
   return (
@@ -283,6 +358,8 @@ export default withRouter(function AdminNav(props) {
       className={clsx('mb-AdminNav', classes.root)}
       component="nav"
       aria-labelledby="nested-list-subheader"
+      // 스크롤 있을 때 스크롤 부분에서 mouseLeve 됐을 때도 popover 안꺼지도록 여기에 이벤트 추가
+      onMouseLeave={handlePopoverClose}
       subheader={
         <ListSubheader
           component="div"
@@ -323,6 +400,9 @@ export default withRouter(function AdminNav(props) {
           return (
             <React.Fragment key={menuSeq}>
               <ListItem
+                className={clsx(classes.listItemWrap, {
+                  selected: curTab === menuUrl
+                })}
                 button
                 onClick={event =>
                   handleClick({ event, index, hasSubMenu, menuUrl })
@@ -332,10 +412,6 @@ export default withRouter(function AdminNav(props) {
                     ? event => handlePopoverOpen({ event, subMenu })
                     : null
                 }
-                onMouseLeave={!navOpen ? handlePopoverClose : null}
-                className={clsx(classes.listItemWrap, {
-                  selected: curTab === menuUrl
-                })}
               >
                 <ListItemIcon className={classes.icon}>
                   {(() => {
