@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
+import numeral from 'numeral';
 import { lighten, makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -15,7 +16,7 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import LinearProgress from '@material-ui/core/LinearProgress';
+// import LinearProgress from '@material-ui/core/LinearProgress';
 import CircularProgress from '@material-ui/core/CircularProgress';
 // import FormControlLabel from '@material-ui/core/FormControlLabel';
 // import Switch from '@material-ui/core/Switch';
@@ -248,6 +249,7 @@ const useStyles = makeStyles(theme => ({
   }
 }));
 
+let selected = [];
 export default function EnhancedTable({
   headCells,
   rows = [],
@@ -264,11 +266,19 @@ export default function EnhancedTable({
 }) {
   rows = !rows ? [] : rows;
   const classes = useStyles();
-  const [selected, setSelected] = React.useState([]);
+  // const [selected, setSelected] = React.useState([]);
   // const [page, setPage] = React.useState(0);
   // const [dense, setDense] = React.useState(false);
   // const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const scrollRef = React.createRef();
+
+  useEffect(() => {
+    // 정렬 및 필터링 시 체크 초기화
+    if (page === 1 && moreFetching) {
+      // setSelected([]);
+      selected = [];
+    }
+  }, [page, moreFetching]);
 
   useEffect(() => {
     if (page === 1 && !!scrollRef.current) {
@@ -280,10 +290,12 @@ export default function EnhancedTable({
   function handleSelectAllClick(event) {
     if (event.target.checked) {
       const newSelecteds = rows.map((n, index) => index);
-      setSelected(newSelecteds);
+      // setSelected(newSelecteds);
+      selected = newSelecteds;
       return;
     }
-    setSelected([]);
+    // setSelected([]);
+    selected = [];
   }
 
   function handleClick(event, name) {
@@ -303,7 +315,8 @@ export default function EnhancedTable({
       );
     }
 
-    setSelected(newSelected);
+    // setSelected(newSelected);
+    selected = newSelected;
   }
 
   // function handleChangeRowsPerPage(event) {
@@ -320,13 +333,20 @@ export default function EnhancedTable({
    */
   function handleTableScroll(event) {
     const { scrollHeight, scrollTop, clientHeight } = event.currentTarget;
+
     if (
       scrollTop !== 0 &&
-      scrollHeight - scrollTop < clientHeight + 100 &&
+      scrollHeight - scrollTop < clientHeight * 3 &&
+      // scrollHeight - scrollTop <= clientHeight &&
       moreFetching === false
     ) {
       fetchData();
     }
+  }
+
+  function onChangeCheckbox(event, index) {
+    event.target.checked = !event.target.checked;
+    handleClick(event, index);
   }
 
   const isSelected = key => selected.indexOf(key) !== -1;
@@ -335,18 +355,20 @@ export default function EnhancedTable({
   return (
     <div className={clsx('mb-EnhancedTable', classes.root)}>
       <Paper className={classes.paper}>
-        <div
+        {/* <div
           className={clsx(classes.loadingBar, {
             loading: page !== 1 && moreFetching
           })}
-        >
-          <LinearProgress className={classes.progress} />
-        </div>
+        > */}
+        {/* 무한스크롤 로딩 */}
+        {/* <LinearProgress className={classes.progress} />
+        </div> */}
         <div
           className={clsx(classes.circularProgressWrap, {
             loading: page === 1 && moreFetching
           })}
         >
+          {/* 정렬 및 필터 로딩 */}
           <div>
             <CircularProgress className={classes.progress} />
           </div>
@@ -378,8 +400,6 @@ export default function EnhancedTable({
               <TableBody>
                 {rows.map((row, index) => {
                   const isItemSelected = isSelected(index);
-                  const labelId = `enhanced-table-checkbox-${index}`;
-
                   const rowProps = !hasCheckbox
                     ? {}
                     : {
@@ -389,22 +409,13 @@ export default function EnhancedTable({
                         selected: isItemSelected
                       };
 
-                  const firstCellProps = !hasCheckbox
-                    ? {}
-                    : {
-                        component: 'th',
-                        id: { labelId },
-                        scope: 'row',
-                        padding: 'none'
-                      };
-
                   return (
                     <TableRow hover tabIndex={-1} key={index} {...rowProps}>
                       {hasCheckbox ? (
                         <TableCell padding="checkbox">
                           <Checkbox
                             checked={isItemSelected}
-                            inputProps={{ 'aria-labelledby': labelId }}
+                            onChange={event => onChangeCheckbox(event, index)}
                           />
                         </TableCell>
                       ) : null}
@@ -412,28 +423,19 @@ export default function EnhancedTable({
                         const cell = [];
                         for (let i = 0; i < headCells.length; i++) {
                           const headCell = headCells[i];
-                          const align = headCell.numeric ? 'right' : 'left';
-                          if (typeof row[headCell.id] === 'undefined') {
+                          const { id: headId, numeric, format } = headCell;
+                          const align = numeric ? 'right' : 'left';
+                          if (typeof row[headId] === 'undefined') {
+                            // header 에 있는 값만 body에 뿌려줌
                             continue;
                           }
-                          if (cell.length === 0) {
-                            // 첫번째 컬럼
-                            cell.push(
-                              <TableCell
-                                key={headCell.id}
-                                {...firstCellProps}
-                                align={align}
-                              >
-                                {row[headCell.id]}
-                              </TableCell>
-                            );
-                          } else {
-                            cell.push(
-                              <TableCell key={headCell.id} align={align}>
-                                {row[headCell.id]}
-                              </TableCell>
-                            );
-                          }
+                          cell.push(
+                            <TableCell key={headId} align={align}>
+                              {format !== '@'
+                                ? numeral(row[headId]).format(format)
+                                : row[headId]}
+                            </TableCell>
+                          );
                         }
                         return cell;
                       })()}

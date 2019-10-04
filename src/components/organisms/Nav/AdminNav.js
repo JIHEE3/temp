@@ -14,7 +14,6 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
 import Skeleton from '@material-ui/lab/Skeleton';
 
 import InboxIcon from '@material-ui/icons/MoveToInbox';
@@ -83,7 +82,7 @@ const nestedListStyles = makeStyles(theme => ({
   popoverPaper: {
     position: 'absolute',
     width: '300px',
-    zIndex: 10,
+    zIndex: 100,
     borderRadius: 0,
     boxShadow: theme.shadows[3]
   },
@@ -154,20 +153,20 @@ function SubMenu(props) {
           }
 
           return (
-            <Tooltip key={menuSeq} title={menuNm} placement="right">
-              <ListItem
-                button
-                className={clsx(classes.nested, {
-                  selected: curTab === menuUrl
-                })}
-                onClick={event => handleClick({ event, menuUrl })}
-              >
-                {/* <ListItemIcon>
+            <ListItem
+              button
+              className={clsx(classes.nested, {
+                selected: curTab === menuUrl
+              })}
+              title={menuNm}
+              key={menuSeq}
+              onClick={event => handleClick({ event, menuUrl })}
+            >
+              {/* <ListItemIcon>
                   <StarBorder />
                 </ListItemIcon> */}
-                <ListItemText className={classes.ellipsis} primary={menuNm} />
-              </ListItem>
-            </Tooltip>
+              <ListItemText className={classes.ellipsis} primary={menuNm} />
+            </ListItem>
           );
         })}
       </List>

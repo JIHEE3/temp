@@ -8,6 +8,8 @@ import MultipleChart from 'components/organisms/Chart/MultiplexChart';
 import { fetchHeader, under2camel } from 'lib/commonLib';
 
 let page = 1;
+// const LIMIT = 60;
+// let realList = null;
 
 const TableTestPage2 = () => {
   const [headCells, setHeadCells] = useState([]);
@@ -40,6 +42,10 @@ const TableTestPage2 = () => {
         const { data } = response.data;
         const orgList = !list || page === 1 ? [] : list;
         setList(orgList.concat(data));
+        // const orgList = !realList || page === 1 ? [] : realList;
+        // realList = orgList.concat(data);
+        // debugger;
+        // setList(realList.slice((page - 1) * LIMIT, page * LIMIT));
         setError(false);
       })
       .catch(error => {
@@ -89,8 +95,8 @@ const TableTestPage2 = () => {
         loading={isLoading}
         page={page}
         headCells={headCells}
-        // hasCheckbox={false}
-        hasCheckbox={true}
+        hasCheckbox={false}
+        // hasCheckbox={true}
         dense={true}
         order={order}
         orderBy={orderBy}
