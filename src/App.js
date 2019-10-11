@@ -1,28 +1,31 @@
 import React, { useEffect } from 'react';
 // import './App.css';
 import { useSelector } from 'react-redux';
-import { Route, Switch, withRouter } from 'react-router-dom';
+import { Route, Switch, withRouter, Redirect } from 'react-router-dom';
 import { createMuiTheme } from '@material-ui/core/styles';
 import {
   ThemeProvider,
   StylesProvider,
-  createGenerateClassName
+  createGenerateClassName,
 } from '@material-ui/styles';
 import { indigo, deepPurple } from '@material-ui/core/colors';
 
-import Join from 'pages/join/Join/Join';
-import LoginFormContainer from 'pages/login/LoginForm/LoginFormContainer';
-import AdminTemplate from 'pages/templates/AdminTemplate';
-import StatisticsContainer from 'pages/admin/Statistics/StatisticsContainer';
-import TableTestPageContainer from 'pages/admin/TableTestPage/TableTestPageContainer';
-import TableTestPage2Container from 'pages/admin/TableTestPage2/TableTestPage2Container';
+import Guides from 'pages/Guides';
+import Join from 'pages/Join/Join';
+import RegisterSuccess from 'pages/Join/RegisterSuccess';
+import LoginFormContainer from 'pages/Login/LoginForm';
+import MainTemplate from 'pages/templates/MainTemplate';
+import Users from 'pages/Main/Users';
+import StatisticsContainer from 'pages/Main/Statistics';
+// import TableTestPageContainer from 'pages/Main/TableTestPage';
+import TableTestPage2Container from 'pages/Main/TableTestPage2';
 
 // 임시
 import LoginTemplate from 'pages/templates/LoginTemplate';
 import MediaTemplate from 'pages/templates/MediaTemplate';
 
 const generateClassName = createGenerateClassName({
-  productionPrefix: 'testest'
+  productionPrefix: 'testest',
 });
 
 /**
@@ -35,14 +38,14 @@ const theme = createMuiTheme({
       // hover: 'rgba(245, 0, 87, 0.08)'
     },
     background: {
-      header: '#181c27'
+      header: '#181c27',
     },
     primary: indigo,
     secondary: deepPurple,
     text: {
       // primary: '#33691e'
-    }
-  }
+    },
+  },
 });
 
 /**
@@ -51,8 +54,9 @@ const theme = createMuiTheme({
 function App(props) {
   console.dir(theme);
   const { history, location } = props;
-  const { menu } = useSelector(({ menu }) => ({
-    menu: menu.list
+  const { user, menu } = useSelector(({ auth, menu }) => ({
+    user: auth.user,
+    menu: menu.list,
   }));
 
   useEffect(() => {
@@ -75,6 +79,8 @@ function App(props) {
       <StylesProvider generateClassName={generateClassName}>
         <ThemeProvider theme={theme}>
           <Switch>
+            {/* 퍼블리싱 관리 페이지 */}
+            <Route path="/guides" component={Guides} />
             {/* 로그인 */}
             <Route path="/login" component={LoginFormContainer} />
             <Route
@@ -82,11 +88,16 @@ function App(props) {
               render={() => <LoginTemplate>비밀번호 찾기</LoginTemplate>}
             />
             {/* 가입 */}
-            <Route path="/join" component={Join} />
+            <Route exact path="/join" component={Join} />
+            <Route path="/join/:userId" component={RegisterSuccess} />
             {/* 매인 */}
-            <Route exact path="/" component={AdminTemplate} />
-            <Route path="/user" component={TableTestPage2Container} />
-            <Route path="/realtime" component={TableTestPageContainer} />
+            {user === null ? (
+              <Redirect to="/login" />
+            ) : (
+              <Route exact path="/" component={MainTemplate} />
+            )}
+            <Route path="/manage/members" component={Users} />
+            <Route path="/realtime" component={TableTestPage2Container} />
             <Route path="/productInfoList" component={StatisticsContainer} />
             <Route path="/test" render={() => `url이 test로 모두 겹침`} />
 

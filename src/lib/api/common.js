@@ -12,8 +12,8 @@ export const setLocale = locale => client.get(`/api/locale/${locale}`);
 export const menuList = () => client.get(`/api/manage/auth/navMenu`);
 
 /**
- * 통계페이지별 테이블 headr
+ * 테이블 headr
  * @param {string} url 페이지 url
  */
-export const reportHeaders = (uri = '') =>
+export const tableHeaders = (uri = '') =>
   client.get(`/api/layout/head`, { params: { uri } });

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
 import {
   Typography,
@@ -7,6 +8,8 @@ import {
   Breadcrumbs,
   Avatar
 } from '@material-ui/core';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import TouchAppIcon from '@material-ui/icons/TouchApp';
 import ChildCareIcon from '@material-ui/icons/ChildCare';
 
@@ -82,10 +85,21 @@ const useStyles = makeStyles(theme => ({
   avatar: {
     background: 'none',
     marginRight: -theme.spacing(1.5)
+  },
+  loginOption: {
+    marginLeft: 0
   }
 }));
 
-const LoginForm = ({ form, error, onChange, onSubmit }) => {
+const LoginForm = ({
+  form,
+  error,
+  saveId = false,
+  onChange,
+  onChangeCheckbox,
+  onSubmit
+}) => {
+  const { t } = useTranslation();
   const classes = useStyles();
 
   return (
@@ -128,6 +142,19 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
                 margin="normal"
                 variant="outlined"
               />
+              <FormControlLabel
+                className={classes.loginOption}
+                control={
+                  <Checkbox
+                    color="primary"
+                    checked={saveId}
+                    onChange={onChangeCheckbox}
+                    value="saveId"
+                  />
+                }
+                label={t('아이디 저장')}
+                labelPlacement="end"
+              />
               <Button
                 type="submit"
                 variant="contained"
@@ -135,7 +162,7 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
                 color="primary"
                 className={classes.margin}
               >
-                로그인
+                {t('로그인')}
               </Button>
               <Typography className={classes.loginMessage} variant="body1">
                 {error}
@@ -144,7 +171,7 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
                 <StyledBreadcrumb
                   component="a"
                   href="/join"
-                  label="회원가입"
+                  label={t('계정 생성')}
                   avatar={
                     <Avatar className={classes.avatar}>
                       <TouchAppIcon />
@@ -156,7 +183,7 @@ const LoginForm = ({ form, error, onChange, onSubmit }) => {
                   <StyledBreadcrumb
                     component="a"
                     href="/find-password"
-                    label="Password 찾기"
+                    label={t('비밀번호 재설정')}
                   />
                 </Breadcrumbs>
               </div>

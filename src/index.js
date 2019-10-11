@@ -47,7 +47,8 @@ loadUser();
 setLocale(i18n.language)
   .then(response => {
     store.dispatch(initializeLocale(i18n.language));
-    store.dispatch(getMenu());
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (user) store.dispatch(getMenu());
   })
   .catch(error => {
     console.log(error);

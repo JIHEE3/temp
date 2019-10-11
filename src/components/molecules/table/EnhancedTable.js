@@ -32,11 +32,11 @@ import SnackbarContentWrapper from 'components/molecules/Snackbar/SnackbarConten
 function EnhancedTableHead(props) {
   const {
     classes,
-    onSelectAllClick,
+    // onSelectAllClick,
     order,
     orderBy,
-    numSelected,
-    rowCount,
+    // numSelected,
+    // rowCount,
     onRequestSort,
     headCells,
     hasCheckbox
@@ -51,12 +51,12 @@ function EnhancedTableHead(props) {
       <TableRow>
         {hasCheckbox ? (
           <TableCell padding="checkbox" style={{ zIndex: 10 }}>
-            <Checkbox
+            {/* <Checkbox
               indeterminate={numSelected > 0 && numSelected < rowCount}
               checked={!!numSelected && numSelected === rowCount}
               onChange={onSelectAllClick}
               inputProps={{ 'aria-label': 'select all desserts' }}
-            />
+            /> */}
           </TableCell>
         ) : null}
         {headCells.map(headCell => (
@@ -171,6 +171,17 @@ const EnhancedTableToolbar = props => {
 
 EnhancedTableToolbar.propTypes = {
   numSelected: PropTypes.number.isRequired
+};
+
+const MbCheckbox = ({ index, checked, onChange }) => {
+  const [selected, setSelected] = React.useState(checked);
+
+  function onChangeCheckbox() {
+    setSelected(!selected);
+    onChange(index);
+  }
+
+  return <Checkbox checked={selected} onChange={onChangeCheckbox} />;
 };
 
 const useStyles = makeStyles(theme => ({
@@ -290,11 +301,9 @@ export default function EnhancedTable({
   function handleSelectAllClick(event) {
     if (event.target.checked) {
       const newSelecteds = rows.map((n, index) => index);
-      // setSelected(newSelecteds);
       selected = newSelecteds;
       return;
     }
-    // setSelected([]);
     selected = [];
   }
 
@@ -314,8 +323,6 @@ export default function EnhancedTable({
         selected.slice(selectedIndex + 1)
       );
     }
-
-    // setSelected(newSelected);
     selected = newSelected;
   }
 
@@ -344,9 +351,9 @@ export default function EnhancedTable({
     }
   }
 
-  function onChangeCheckbox(event, index) {
-    event.target.checked = !event.target.checked;
-    handleClick(event, index);
+  function onChangeCheckbox(index) {
+    handleClick(null, index);
+    console.log(selected);
   }
 
   const isSelected = key => selected.indexOf(key) !== -1;
@@ -373,7 +380,7 @@ export default function EnhancedTable({
             <CircularProgress className={classes.progress} />
           </div>
         </div>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        {/* <EnhancedTableToolbar numSelected={selected.length} /> */}
         <div
           className={classes.tableWrapper}
           onScroll={handleTableScroll}
@@ -403,7 +410,7 @@ export default function EnhancedTable({
                   const rowProps = !hasCheckbox
                     ? {}
                     : {
-                        onClick: event => handleClick(event, index),
+                        // onClick: event => handleClick(event, index),
                         role: 'checkbox',
                         'aria-checked': isItemSelected,
                         selected: isItemSelected
@@ -413,9 +420,10 @@ export default function EnhancedTable({
                     <TableRow hover tabIndex={-1} key={index} {...rowProps}>
                       {hasCheckbox ? (
                         <TableCell padding="checkbox">
-                          <Checkbox
+                          <MbCheckbox
+                            index={index}
                             checked={isItemSelected}
-                            onChange={event => onChangeCheckbox(event, index)}
+                            onChange={onChangeCheckbox}
                           />
                         </TableCell>
                       ) : null}

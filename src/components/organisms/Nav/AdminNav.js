@@ -35,46 +35,46 @@ const nestedListStyles = makeStyles(theme => ({
     overflowX: 'hidden',
     '& .selected': {
       color: theme.palette.common.white,
-      backgroundColor: theme.palette.primary.main
-    }
+      backgroundColor: theme.palette.primary.main,
+    },
   },
   listHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     '& div': {
-      lineHeight: theme.spacing(1)
-    }
+      lineHeight: theme.spacing(1),
+    },
   },
   listItemWrap: {
     justifyContent: 'center',
     position: 'relative',
     borderTop: '1px solid rgba(0, 0, 0, 0.12)',
     '&:last-child': {
-      borderBottom: '1px solid rgba(0, 0, 0, 0.12)'
-    }
+      borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    },
   },
   listTitle: {
     display: 'flex',
     width: '100%',
     alignItems: 'center',
-    marginLeft: theme.spacing(1)
+    marginLeft: theme.spacing(1),
   },
   /**
    * 메뉴 숨김 보임 관련 시작
    */
   menuButton: {
-    marginRight: 36
+    marginRight: 36,
   },
   hide: {
-    display: 'none'
+    display: 'none',
   },
   toolbar: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'flex-end',
     marginRight: '-12px',
-    ...theme.mixins.toolbar
+    ...theme.mixins.toolbar,
   },
   /**
    * 메뉴 숨김 보임 관련 끝
@@ -84,44 +84,44 @@ const nestedListStyles = makeStyles(theme => ({
     width: '300px',
     zIndex: 100,
     borderRadius: 0,
-    boxShadow: theme.shadows[3]
+    boxShadow: theme.shadows[3],
   },
   subMenuTitle: {
-    margin: theme.spacing(1, 1, 0, 1)
+    margin: theme.spacing(1, 1, 0, 1),
   },
   icon: {
-    minWidth: 'auto'
+    minWidth: 'auto',
   },
   center: {
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   margenR0: {
-    marginRight: 0
+    marginRight: 0,
   },
   loadingWrap: {
-    margin: `${theme.spacing(1)}%`
+    margin: `${theme.spacing(1)}%`,
   },
   popoverSelected: {
     color: theme.palette.common.white,
     backgroundColor: theme.palette.grey[600],
     '&:hover': {
-      backgroundColor: theme.palette.grey[600]
-    }
-  }
+      backgroundColor: theme.palette.grey[600],
+    },
+  },
 }));
 
 const subMenuStyles = makeStyles(theme => ({
   listWrap: {
-    backgroundColor: theme.palette.primary[50]
+    backgroundColor: theme.palette.primary[50],
   },
   nested: {
-    paddingLeft: theme.spacing(6)
+    paddingLeft: theme.spacing(6),
   },
   ellipsis: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    whiteSpace: 'nowrap'
-  }
+    whiteSpace: 'nowrap',
+  },
 }));
 
 /**
@@ -134,7 +134,7 @@ function SubMenu(props) {
     open,
     handleClick,
     curTab,
-    openHighMenuCallBack
+    openHighMenuCallBack,
   } = props;
   const classes = subMenuStyles();
 
@@ -156,7 +156,7 @@ function SubMenu(props) {
             <ListItem
               button
               className={clsx(classes.nested, {
-                selected: curTab === menuUrl
+                selected: curTab === menuUrl,
               })}
               title={menuNm}
               key={menuSeq}
@@ -187,8 +187,8 @@ export default withRouter(function AdminNav(props) {
   const { pathname } = location;
   const classes = nestedListStyles();
   const { menu, loading } = useSelector(({ menu, loading }) => ({
-    menu: menu.list,
-    loading: loading[MENU]
+    menu: menu.list === null ? [] : menu.list,
+    loading: loading[MENU],
   }));
 
   // status
@@ -209,7 +209,7 @@ export default withRouter(function AdminNav(props) {
   }
 
   /**
-   *
+   * 메뉴 클릭
    * @param {json} param0 { event, index, hasSubMenu, menuUrl }
    */
   function handleClick({ event, index, hasSubMenu, menuUrl }) {
@@ -240,7 +240,7 @@ export default withRouter(function AdminNav(props) {
       offsetWidth: targetWidth,
       offsetHeight: targetHeight,
       textContent,
-      parentElement
+      parentElement,
     } = currentTarget;
     const headerHeight = 70;
     let popoverParentEl = document.getElementById(menuPopoverId);
@@ -253,7 +253,7 @@ export default withRouter(function AdminNav(props) {
       left:
         targetLeft +
         targetWidth +
-        (parentElement.offsetWidth - parentElement.clientWidth)
+        (parentElement.offsetWidth - parentElement.clientWidth),
     };
 
     if (popoverParentEl === null) {
@@ -286,7 +286,7 @@ export default withRouter(function AdminNav(props) {
               <ListItem
                 key={menuSeq}
                 className={clsx({
-                  [classes.popoverSelected]: curTab === menuUrl
+                  [classes.popoverSelected]: curTab === menuUrl,
                 })}
                 button
                 onClick={event => {
@@ -400,7 +400,7 @@ export default withRouter(function AdminNav(props) {
             <React.Fragment key={menuSeq}>
               <ListItem
                 className={clsx(classes.listItemWrap, {
-                  selected: curTab === menuUrl
+                  selected: curTab === menuUrl,
                 })}
                 button
                 onClick={event =>
@@ -434,7 +434,7 @@ export default withRouter(function AdminNav(props) {
 
                 <div
                   className={clsx(classes.listTitle, {
-                    [classes.hide]: !navOpen
+                    [classes.hide]: !navOpen,
                   })}
                 >
                   <ListItemText primary={menuNm} />
