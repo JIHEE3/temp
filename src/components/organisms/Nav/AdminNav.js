@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
-import { withRouter } from 'react-router-dom';
+import { withRouter, useRouteMatch } from 'react-router-dom';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
@@ -16,49 +16,76 @@ import Collapse from '@material-ui/core/Collapse';
 import IconButton from '@material-ui/core/IconButton';
 import Skeleton from '@material-ui/lab/Skeleton';
 
-import InboxIcon from '@material-ui/icons/MoveToInbox';
-import DraftsIcon from '@material-ui/icons/Drafts';
-import SendIcon from '@material-ui/icons/Send';
-import ExpandLess from '@material-ui/icons/ExpandLess';
 import ExpandMore from '@material-ui/icons/ExpandMore';
-import FilterHdrIcon from '@material-ui/icons/FilterHdr';
-import CloseIcon from '@material-ui/icons/Close';
 import DehazeIcon from '@material-ui/icons/Dehaze';
 
-import { MENU } from 'modules/menu';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faUserEdit,
+  faCube,
+  faArchive,
+  faAnalytics,
+  faCoins,
+} from '@fortawesome/pro-duotone-svg-icons';
+
+import { MENU, curMenu } from 'modules/menu';
+import { Scrollbars } from 'react-custom-scrollbars';
+import MbSVG from 'components/atoms/MbSVG';
 
 const nestedListStyles = makeStyles(theme => ({
   root: {
     width: '100%',
     maxWidth: 360,
-    backgroundColor: theme.palette.background.paper,
+    backgroundColor: '#3a4652',
     overflowX: 'hidden',
+    color: theme.palette.primary.menuColor,
     '& .selected': {
-      color: theme.palette.common.white,
-      backgroundColor: theme.palette.primary.main,
+      color: theme.palette.primary.deep,
     },
+  },
+  highlight: {
+    backgroundColor: theme.palette.primary.deep,
+    color: theme.palette.common.white,
   },
   listHeader: {
     display: 'flex',
+    padding: '0 20px',
     justifyContent: 'space-between',
     alignItems: 'center',
-    '& div': {
+    zIndex: 'auto',
+    color: theme.palette.common.white,
+    '& > div': {
       lineHeight: theme.spacing(1),
+      '& > button': {
+        color: theme.palette.common.white,
+      },
     },
+  },
+  title: {
+    overflow: 'hidden',
+    whiteSpace: 'nowrap',
+    textOverflow: 'ellipsis',
   },
   listItemWrap: {
     justifyContent: 'center',
     position: 'relative',
     borderTop: '1px solid rgba(0, 0, 0, 0.12)',
+    paddingTop: '10px',
+    paddingBottom: '10px',
     '&:last-child': {
       borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+    },
+  },
+  listItemText: {
+    '& > span': {
+      fontSize: '17px',
     },
   },
   listTitle: {
     display: 'flex',
     width: '100%',
     alignItems: 'center',
-    marginLeft: theme.spacing(1),
+    marginLeft: '12px',
   },
   /**
    * 메뉴 숨김 보임 관련 시작
@@ -85,12 +112,15 @@ const nestedListStyles = makeStyles(theme => ({
     zIndex: 100,
     borderRadius: 0,
     boxShadow: theme.shadows[3],
+    overflow: 'hidden !important',
   },
   subMenuTitle: {
     margin: theme.spacing(1, 1, 0, 1),
   },
   icon: {
     minWidth: 'auto',
+    color: theme.palette.primary.menuColor,
+    width: '20px',
   },
   center: {
     justifyContent: 'center',
@@ -108,14 +138,33 @@ const nestedListStyles = makeStyles(theme => ({
       backgroundColor: theme.palette.grey[600],
     },
   },
+  customScroll: {
+    backgroundColor: '#3a4652',
+  },
+  drawerCloseScroll: {
+    backagroundColor: '#3a4652',
+    '& > div:first-child': {
+      position: 'relative !important',
+      maxHeight: 500,
+    },
+  },
+  expandIcon: {
+    transition: 'all ease 0.4s',
+    fontSize: '30px',
+  },
+  menuOpen: {
+    transform: 'rotate( -180deg )',
+  },
 }));
 
 const subMenuStyles = makeStyles(theme => ({
   listWrap: {
-    backgroundColor: theme.palette.primary[50],
+    backgroundColor: '#2e3841',
+    color: '#778b9d',
   },
   nested: {
-    paddingLeft: theme.spacing(6),
+    paddingLeft: 19,
+    '&.subSelected': { color: '#79bd2f' },
   },
   ellipsis: {
     overflow: 'hidden',
@@ -134,9 +183,10 @@ function SubMenu(props) {
     open,
     handleClick,
     curTab,
-    openHighMenuCallBack,
+    // openHighMenuCallBack,
   } = props;
   const classes = subMenuStyles();
+  const { path } = useRouteMatch();
 
   if (!menuList) {
     return null;
@@ -146,43 +196,64 @@ function SubMenu(props) {
   const subMenuUi = (
     <Collapse in={open} timeout="auto" unmountOnExit className={className}>
       <List component="div" disablePadding className={classes.listWrap}>
-        {menuList.map(menu => {
-          const { menuSeq, menuUrl, menuNm } = menu;
-          if (!openHighMenu) {
-            openHighMenu = curTab === menuUrl && !open;
-          }
+        {(() => {
+          const result = [];
+          for (let key of menuList.keys()) {
+            const { menuSeq, menuUrl, menuNm, menuPathNm } = menuList.get(key);
+            const isCurMenu = curTab === menuUrl || path === menuUrl;
+            if (!openHighMenu) {
+              openHighMenu = isCurMenu && !open;
+            }
 
-          return (
-            <ListItem
-              button
-              className={clsx(classes.nested, {
-                selected: curTab === menuUrl,
-              })}
-              title={menuNm}
-              key={menuSeq}
-              onClick={event => handleClick({ event, menuUrl })}
-            >
-              {/* <ListItemIcon>
-                  <StarBorder />
-                </ListItemIcon> */}
-              <ListItemText className={classes.ellipsis} primary={menuNm} />
-            </ListItem>
-          );
-        })}
+            result.push(
+              <ListItem
+                button
+                className={clsx(classes.nested, {
+                  selected: isCurMenu,
+                })}
+                title={menuNm}
+                key={menuSeq}
+                onClick={event => handleClick({ event, menuUrl, menuPathNm })}
+              >
+                <ListItemText className={classes.ellipsis} primary={menuNm} />
+              </ListItem>
+            );
+          }
+          return result;
+        })()}
       </List>
     </Collapse>
   );
 
   if (openHighMenu) {
-    openHighMenuCallBack();
+    // openHighMenuCallBack();
   }
 
   return subMenuUi;
 }
 
+let openKeyMap = new Map();
 const menuPopoverId = 'menu-popover';
 export default withRouter(function AdminNav(props) {
+  // 메뉴별 아이콘 정의
+  const menuIconMap = (() => {
+    const result = new Map();
+    // 사용자 관리
+    result.set(520, { value: faUserEdit });
+    // 상품 관리
+    result.set(515, { value: faArchive });
+    // 보고서
+    result.set(516, { value: faAnalytics });
+    // 매출/정산
+    result.set(517, { value: faCoins });
+    // RTB
+    result.set(518, { value: 'adIcon', isSvg: true });
+    // 시스템 관리
+    result.set(519, { value: 'setting', isSvg: true });
+    return result;
+  })();
   const { t } = useTranslation();
+  const dispatch = useDispatch();
   const { history, location, navOpen, handleDrawerToggle } = props;
   const { pathname } = location;
   const classes = nestedListStyles();
@@ -192,7 +263,7 @@ export default withRouter(function AdminNav(props) {
   }));
 
   // status
-  const [openKeys, setOpenKeys] = useState([true]);
+  const [openKeys, setOpenKeys] = useState(openKeyMap);
   const [curTab, setCurTab] = useState(pathname);
 
   useEffect(() => {
@@ -202,26 +273,31 @@ export default withRouter(function AdminNav(props) {
   /**
    * 상위 메뉴 오픈
    */
-  function openHighMenu(index) {
-    const opens = [].concat(openKeys);
-    opens[index] = !opens[index];
-    setOpenKeys(opens);
+  function openHighMenu(key) {
+    openKeyMap = new Map(openKeyMap);
+    openKeyMap.set(key, !openKeyMap.get(key));
+    setOpenKeys(openKeyMap);
   }
 
   /**
    * 메뉴 클릭
-   * @param {json} param0 { event, index, hasSubMenu, menuUrl }
+   * @param {json} param0 { event, key, hasSubMenu, menuUrl }
    */
-  function handleClick({ event, index, hasSubMenu, menuUrl }) {
+  function handleClick({ event, key, hasSubMenu, menuUrl, menuPathNm }) {
     event.stopPropagation();
     if (hasSubMenu) {
       if (navOpen) {
-        openHighMenu(index);
+        openHighMenu(key);
       }
     } else {
       if (!!menuUrl) {
         if (menuUrl !== curTab) {
-          history.push(menuUrl);
+          if (menuUrl.indexOf('http') !== -1) {
+            window.open(menuUrl);
+          } else {
+            dispatch(curMenu(menuPathNm));
+            history.push(menuUrl);
+          }
         }
       }
     }
@@ -265,7 +341,8 @@ export default withRouter(function AdminNav(props) {
       popoverParentEl.style.display = 'block';
     }
 
-    await ReactDOM.render(
+    // await ReactDOM.render(
+    ReactDOM.render(
       <Paper
         className={clsx('mb-AdminNavPopover', classes.popoverPaper)}
         style={{ ...popoverStyle }}
@@ -280,24 +357,36 @@ export default withRouter(function AdminNav(props) {
           {textContent}
         </Typography>
         <List dense={true}>
-          {subMenu.map(menu => {
-            const { menuSeq, menuNm, menuUrl } = menu;
-            return (
-              <ListItem
-                key={menuSeq}
-                className={clsx({
-                  [classes.popoverSelected]: curTab === menuUrl,
-                })}
-                button
-                onClick={event => {
-                  handleClick({ event, menuUrl });
-                  handlePopoverClose(event);
-                }}
-              >
-                <ListItemText primary={menuNm} />
-              </ListItem>
-            );
-          })}
+          <Scrollbars
+            autoHide
+            autoHideTimeout={1000}
+            autoHideDuration={200}
+            className={classes.drawerCloseScroll}
+          >
+            {(() => {
+              const menuList = [];
+              for (let menu of subMenu.values()) {
+                const { menuSeq, menuNm, menuUrl, menuPathNm } = menu;
+                menuList.push(
+                  <ListItem
+                    key={menuSeq}
+                    className={clsx({
+                      [classes.popoverSelected]: curTab === menuUrl,
+                    })}
+                    button
+                    onClick={event => {
+                      handleClick({ event, menuUrl, menuPathNm });
+                      handlePopoverClose(event);
+                    }}
+                  >
+                    <ListItemText primary={menuNm} />
+                  </ListItem>
+                );
+              }
+
+              return menuList;
+            })()}
+          </Scrollbars>
         </List>
       </Paper>,
       popoverParentEl
@@ -352,107 +441,169 @@ export default withRouter(function AdminNav(props) {
     }
   }
 
-  return (
-    <List
-      className={clsx('mb-AdminNav', classes.root)}
-      component="nav"
-      aria-labelledby="nested-list-subheader"
-      // 스크롤 있을 때 스크롤 부분에서 mouseLeve 됐을 때도 popover 안꺼지도록 여기에 이벤트 추가
-      onMouseLeave={handlePopoverClose}
-      subheader={
-        <ListSubheader
-          component="div"
-          id="nested-list-subheader"
-          className={clsx(classes.listHeader, { [classes.center]: !navOpen })}
-        >
-          <Typography
-            variant="h5"
-            className={clsx({ [classes.hide]: !navOpen })}
-          >
-            Mobon {t('관리자')}
-          </Typography>
-          <div
-            className={clsx(classes.toolbar, { [classes.margenR0]: !navOpen })}
-          >
-            <IconButton onClick={handleDrawerToggle}>
-              {navOpen ? <CloseIcon /> : <DehazeIcon />}
-            </IconButton>
-          </div>
-        </ListSubheader>
+  /**
+   * 하위 메뉴 선택한 경우 부모 메뉴 highlight 체크 해주기 위한 함수
+   * @param {Map} subMenu
+   */
+  function isHighlight(subMenu) {
+    if (typeof subMenu.get(curTab) !== 'undefined') {
+      return true;
+    } else {
+      let result = false;
+      for (let curMenu of subMenu.values()) {
+        if (result) {
+          break;
+        }
+        if (curMenu.menuUrl === curTab) {
+          result = true;
+          break;
+        } else if (typeof curMenu.subMenu !== 'undefined') {
+          result = isHighlight(curMenu.subMenu);
+        }
       }
+      return result;
+    }
+  }
+
+  return (
+    <Scrollbars
+      autoHide
+      autoHideTimeout={1000}
+      autoHideDuration={200}
+      className={classes.customScroll}
     >
-      {loading ? (
-        <div className={classes.loadingWrap}>
-          <Skeleton />
-          <Skeleton width="60%" />
-          <Skeleton />
-          <Skeleton width="60%" />
-          <Skeleton />
-          <Skeleton width="60%" />
-        </div>
-      ) : (
-        menu.map((menu, index) => {
-          const open = openKeys[index];
-          const { menuSeq, menuNm, subMenu, icon, menuUrl } = menu;
-          const hasSubMenu = !!subMenu;
+      <List
+        className={clsx('mb-AdminNav', classes.root)}
+        component="nav"
+        aria-labelledby="nested-list-subheader"
+        // 스크롤 있을 때 스크롤 부분에서 mouseLeve 됐을 때도 popover 안꺼지도록 여기에 이벤트 추가
+        onMouseLeave={handlePopoverClose}
+        subheader={
+          <ListSubheader
+            component="div"
+            id="nested-list-subheader"
+            className={clsx(classes.listHeader, { [classes.center]: !navOpen })}
+          >
+            <Typography
+              variant="h5"
+              title={t('최고관리자')}
+              className={clsx({ [classes.hide]: !navOpen })}
+              classes={{ h5: classes.title }}
+            >
+              {t('최고관리자')}
+            </Typography>
+            <div
+              className={clsx(classes.toolbar, {
+                [classes.margenR0]: !navOpen,
+              })}
+            >
+              <IconButton onClick={handleDrawerToggle}>
+                <DehazeIcon />
+              </IconButton>
+            </div>
+          </ListSubheader>
+        }
+      >
+        {loading ? (
+          <div className={classes.loadingWrap}>
+            <Skeleton />
+            <Skeleton width="60%" />
+            <Skeleton />
+            <Skeleton width="60%" />
+            <Skeleton />
+            <Skeleton width="60%" />
+          </div>
+        ) : (
+          (() => {
+            const menuList = [];
+            for (let key of menu.keys()) {
+              const open = openKeys.get(key);
+              const curMenu = menu.get(key);
+              const { menuSeq, menuNm, subMenu, menuUrl, menuPathNm } = curMenu;
+              const hasSubMenu = !!subMenu;
+              const iconObj = menuIconMap.get(menuSeq);
+              const Icon = !!iconObj && iconObj.value;
 
-          return (
-            <React.Fragment key={menuSeq}>
-              <ListItem
-                className={clsx(classes.listItemWrap, {
-                  selected: curTab === menuUrl,
-                })}
-                button
-                onClick={event =>
-                  handleClick({ event, index, hasSubMenu, menuUrl })
-                }
-                onMouseEnter={
-                  !navOpen
-                    ? event => handlePopoverOpen({ event, subMenu })
-                    : null
-                }
-              >
-                <ListItemIcon className={classes.icon}>
-                  {(() => {
-                    let Icon = <FilterHdrIcon />;
-                    switch (icon) {
-                      case 'SendIcon':
-                        Icon = <SendIcon />;
-                        break;
-                      case 'DraftsIcon':
-                        Icon = <DraftsIcon />;
-                        break;
-                      case 'InboxIcon':
-                        Icon = <InboxIcon />;
-                        break;
-                      default:
-                        break;
+              const isHighlightMenu =
+                (curTab !== menuUrl &&
+                  typeof subMenu !== 'undefined' &&
+                  isHighlight(subMenu)) ||
+                curTab === menuUrl;
+
+              menuList.push(
+                <React.Fragment key={menuSeq}>
+                  <ListItem
+                    className={clsx(classes.listItemWrap, {
+                      [classes.highlight]: isHighlightMenu,
+                    })}
+                    button
+                    onClick={event =>
+                      handleClick({
+                        event,
+                        key,
+                        hasSubMenu,
+                        menuUrl,
+                        menuPathNm,
+                      })
                     }
-                    return Icon;
-                  })()}
-                </ListItemIcon>
+                    onMouseEnter={
+                      !navOpen
+                        ? event => handlePopoverOpen({ event, subMenu })
+                        : null
+                    }
+                  >
+                    <ListItemIcon className={classes.icon}>
+                      {Icon && iconObj.isSvg ? (
+                        <MbSVG
+                          name={Icon}
+                          fill={isHighlightMenu ? '#fff' : null}
+                          duotone
+                        />
+                      ) : (
+                        <FontAwesomeIcon
+                          className={classes.buttonIcon}
+                          icon={Icon === false ? faCube : Icon}
+                          color={isHighlightMenu ? '#fff' : null}
+                          style={{
+                            fontSize: '16px',
+                          }}
+                        />
+                      )}
+                    </ListItemIcon>
 
-                <div
-                  className={clsx(classes.listTitle, {
-                    [classes.hide]: !navOpen,
-                  })}
-                >
-                  <ListItemText primary={menuNm} />
-                  {hasSubMenu ? open ? <ExpandLess /> : <ExpandMore /> : null}
-                </div>
-              </ListItem>
-              <SubMenu
-                menuList={subMenu}
-                open={open}
-                handleClick={handleClick}
-                curTab={curTab}
-                openHighMenuCallBack={() => openHighMenu(index)}
-                className={clsx({ [classes.hide]: !navOpen })}
-              />
-            </React.Fragment>
-          );
-        })
-      )}
-    </List>
+                    <div
+                      className={clsx(classes.listTitle, {
+                        [classes.hide]: !navOpen,
+                      })}
+                    >
+                      <ListItemText
+                        classes={{ root: classes.listItemText }}
+                        primary={menuNm}
+                      />
+                      {hasSubMenu ? (
+                        <ExpandMore
+                          className={clsx({ [classes.menuOpen]: open })}
+                          classes={{ root: classes.expandIcon }}
+                        />
+                      ) : // )
+                      null}
+                    </div>
+                  </ListItem>
+                  <SubMenu
+                    menuList={subMenu}
+                    open={open}
+                    handleClick={handleClick}
+                    curTab={curTab}
+                    openHighMenuCallBack={() => openHighMenu(key)}
+                    className={clsx({ [classes.hide]: !navOpen })}
+                  />
+                </React.Fragment>
+              );
+            }
+            return menuList;
+          })()
+        )}
+      </List>
+    </Scrollbars>
   );
 });

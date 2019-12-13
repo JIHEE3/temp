@@ -1,24 +1,18 @@
 import React from 'react';
+import { withTranslation } from 'react-i18next';
 import PropTypes from 'prop-types';
 import momentPropTypes from 'react-moment-proptypes';
 import moment from 'moment';
 import omit from 'lodash/omit';
-
-import { withStyles } from 'react-with-styles';
-
 import { DateRangePicker } from 'react-dates';
-
-/**
- * 언어별 파일 불러오도록 변경하기(현재는 기본 en 값)
- */
 import { DateRangePickerPhrases } from 'react-dates/src/defaultPhrases';
 import {
   START_DATE,
   END_DATE,
   HORIZONTAL_ORIENTATION,
-  ANCHOR_LEFT
+  ANCHOR_LEFT,
 } from 'react-dates/src/constants';
-import isSameDay from 'react-dates/src/utils/isSameDay';
+import DatePresets from './DatePresets';
 
 const propTypes = {
   // example props for the demo
@@ -26,8 +20,7 @@ const propTypes = {
   autoFocusEndDate: PropTypes.bool,
   stateDateWrapper: PropTypes.func,
   initialStartDate: momentPropTypes.momentObj,
-  initialEndDate: momentPropTypes.momentObj
-
+  initialEndDate: momentPropTypes.momentObj,
   // ...omit(DateRangePickerShape, [
   //   'startDate',
   //   'endDate',
@@ -91,7 +84,7 @@ const defaultProps = {
   displayFormat: () => moment.localeData().longDateFormat('L'),
 
   monthFormat: 'MMMM YYYY',
-  phrases: DateRangePickerPhrases
+  phrases: DateRangePickerPhrases,
 };
 
 class DateRangePickerWrapper extends React.Component {
@@ -108,49 +101,31 @@ class DateRangePickerWrapper extends React.Component {
     this.state = {
       focusedInput,
       startDate: props.initialStartDate,
-      endDate: props.initialEndDate
+      endDate: props.initialEndDate,
     };
 
     this.onDatesChange = this.onDatesChange.bind(this);
     this.onFocusChange = this.onFocusChange.bind(this);
-    this.renderDatePresets = this.renderDatePresets.bind(this);
+  }
+
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    const { initialization, initialStartDate, initialEndDate } = nextProps;
+    if (initialization) {
+      this.setState({
+        ...this.state,
+        startDate: initialStartDate,
+        endDate: initialEndDate,
+      });
+    }
   }
 
   onDatesChange({ startDate, endDate }) {
     this.setState({ startDate, endDate });
+    this.props.onDatesChange({ startDate, endDate });
   }
 
   onFocusChange(focusedInput) {
     this.setState({ focusedInput });
-  }
-
-  renderDatePresets() {
-    const { presets, styles, css } = this.props;
-    const { startDate, endDate } = this.state;
-
-    return (
-      <div {...css(styles.PresetDateRangePicker_panel)}>
-        {presets.map(({ text, start, end }) => {
-          const isSelected =
-            isSameDay(start, startDate) && isSameDay(end, endDate);
-          return (
-            <button
-              key={text}
-              {...css(
-                styles.PresetDateRangePicker_button,
-                isSelected && styles.PresetDateRangePicker_button__selected
-              )}
-              type='button'
-              onClick={() =>
-                this.onDatesChange({ startDate: start, endDate: end })
-              }
-            >
-              {text}
-            </button>
-          );
-        })}
-      </div>
-    );
   }
 
   render() {
@@ -159,24 +134,39 @@ class DateRangePickerWrapper extends React.Component {
     // autoFocus, autoFocusEndDate, initialStartDate and initialEndDate are helper props for the
     // example wrapper but are not props on the SingleDatePicker itself and
     // thus, have to be omitted.
+    const { t } = this.props;
     const props = omit(this.props, [
       'autoFocus',
       'autoFocusEndDate',
       'initialStartDate',
       'initialEndDate',
-      'presets'
+      'presets',
+      'classes',
+      't',
+      'i18n',
+      'tReady',
+      'dispatch',
+      'initialization',
     ]);
 
     return (
       <div>
         <DateRangePicker
           {...props}
-          renderCalendarInfo={this.renderDatePresets}
+          renderCalendarInfo={() => (
+            <DatePresets
+              startDate={startDate}
+              endDate={endDate}
+              onDatesChange={this.onDatesChange}
+            />
+          )}
           onDatesChange={this.onDatesChange}
           onFocusChange={this.onFocusChange}
           focusedInput={focusedInput}
           startDate={startDate}
           endDate={endDate}
+          startDatePlaceholderText={t('시작 일')}
+          endDatePlaceholderText={t('종료 일')}
         />
       </div>
     );
@@ -186,34 +176,4 @@ class DateRangePickerWrapper extends React.Component {
 DateRangePickerWrapper.propTypes = propTypes;
 DateRangePickerWrapper.defaultProps = defaultProps;
 
-export default withStyles(({ reactDates: { color } }) => ({
-  PresetDateRangePicker_panel: {
-    padding: '0 22px 11px 22px'
-  },
-
-  PresetDateRangePicker_button: {
-    position: 'relative',
-    height: '100%',
-    textAlign: 'center',
-    background: 'none',
-    border: `2px solid ${color.core.primary}`,
-    color: color.core.primary,
-    padding: '4px 12px',
-    marginRight: 8,
-    font: 'inherit',
-    fontWeight: 700,
-    lineHeight: 'normal',
-    overflow: 'visible',
-    boxSizing: 'border-box',
-    cursor: 'pointer',
-
-    ':active': {
-      outline: 0
-    }
-  },
-
-  PresetDateRangePicker_button__selected: {
-    color: color.core.white,
-    background: color.core.primary
-  }
-}))(DateRangePickerWrapper);
+export default withTranslation()(DateRangePickerWrapper);

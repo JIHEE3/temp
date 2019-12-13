@@ -1,101 +1,309 @@
-import React, { PureComponent } from 'react';
+import React from 'react';
 import {
   ResponsiveContainer,
   ComposedChart,
   Line,
-  Area,
   Bar,
+  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
 } from 'recharts';
-import Paper from '@material-ui/core/Paper';
-import { withStyles } from '@material-ui/styles';
+import { useTheme } from '@material-ui/core/styles';
+import CartWrap from './ChartWrap';
+import ChartTooltip from './ChartTooltip';
 
-const data = [
-  {
-    name: 'Page A',
-    uv: 590,
-    pv: 800,
-    amt: 1400
-  },
-  {
-    name: 'Page B',
-    uv: 868,
-    pv: 967,
-    amt: 1506
-  },
-  {
-    name: 'Page C',
-    uv: 1397,
-    pv: 1098,
-    amt: 989
-  },
-  {
-    name: 'Page D',
-    uv: 1480,
-    pv: 1200,
-    amt: 1228
-  },
-  {
-    name: 'Page E',
-    uv: 1520,
-    pv: 1108,
-    amt: 1100
-  },
-  {
-    name: 'Page F',
-    uv: 1400,
-    pv: 680,
-    amt: 1700
+import { toPercent, numberFormatter } from 'lib/commonLib';
+
+// 임시 나중에 합쳐야함
+const renderTooltipContent = ({
+  isPercent,
+  payload,
+  label,
+  keyLabel,
+  customizeData,
+  dataKeys,
+  makeLabel,
+}) => {
+  if (typeof makeLabel !== 'undefined') {
+    label = makeLabel(label);
   }
-];
 
-const styles = theme => ({
-  root: {
-    marginTop: theme.spacing(3)
+  return (
+    <ChartTooltip
+      label={label}
+      payload={payload}
+      keyLabel={keyLabel}
+      isPercent={isPercent}
+      customizeData={customizeData}
+      dataKeys={dataKeys}
+    />
+  );
+};
+
+/**
+ * y 축 만들어 주는 함수
+ * @param {json} param0 { axisData: 축데이터, orientation: 'right' || 'left' }
+ */
+const makeYAxis = ({ axisData, orientation, keyLabel, maxData = {} }) => {
+  const result = [];
+  if (axisData.individually === true) {
+    for (let key in axisData) {
+      if (axisData.hasOwnProperty(key) && key !== 'individually') {
+        const { isPercent } = axisData[key];
+        result.push(
+          <YAxis
+            key={key}
+            yAxisId={key}
+            orientation={orientation}
+            tickFormatter={Boolean(isPercent) ? toPercent : numberFormatter}
+            label={
+              typeof keyLabel[key] !== 'undefined' && {
+                value: `(${keyLabel[key]})`,
+                // angle: -90,
+                position: 'insideBottom',
+                offset: -25,
+                fill: '#666',
+              }
+            }
+            domain={
+              maxData[key] !== undefined
+                ? ['auto', isPercent ? maxData[key] * 100 : maxData[key]]
+                : null
+            }
+          />
+        );
+      }
+    }
+  } else {
+    let key = null;
+    let isPercent = false;
+    for (let curKey in axisData) {
+      if (axisData.hasOwnProperty(curKey)) {
+        if (curKey === 'isPercent') {
+          isPercent = axisData['isPercent'];
+        } else {
+          key = curKey;
+        }
+      }
+    }
+
+    result.push(
+      <YAxis
+        key={`yAxis_${orientation}`}
+        yAxisId={orientation}
+        orientation={orientation}
+        tickFormatter={Boolean(isPercent) ? toPercent : numberFormatter}
+        domain={
+          maxData[key] !== undefined
+            ? ['auto', isPercent ? maxData[key] * 100 : maxData[key]]
+            : null
+        }
+      />
+    );
   }
-});
 
-export default withStyles(styles)(
-  class MultiplexChart extends PureComponent {
-    render() {
-      const { classes } = this.props;
-      return (
-        <Paper className={classes.root}>
-          <div style={{ width: '100%', height: 300 }}>
-            <ResponsiveContainer>
-              <ComposedChart
-                width={500}
-                height={400}
-                data={data}
-                margin={{
-                  top: 20,
-                  right: 20,
-                  bottom: 20,
-                  left: 20
-                }}
-              >
-                <CartesianGrid stroke="#f5f5f5" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
-                <Area
-                  type="monotone"
-                  dataKey="amt"
-                  fill="#8884d8"
-                  stroke="#8884d8"
-                />
-                <Bar dataKey="pv" barSize={20} fill="#413ea0" />
-                <Line type="monotone" dataKey="uv" stroke="#c51162" />
-              </ComposedChart>
-            </ResponsiveContainer>
-          </div>
-        </Paper>
-      );
+  return result;
+};
+
+/**
+ * 축 id 반환
+ * @param {json} param0 { axisData: 축데이터, key: dataKey }
+ */
+const getYAxisId = ({ axisData, key }) => {
+  let yAxisId = 'left';
+  if (typeof axisData !== 'undefined') {
+    if (
+      axisData.left.individually === true &&
+      typeof axisData.left[key] !== 'undefined'
+    ) {
+      yAxisId = key;
+    } else if (typeof axisData.right[key] !== 'undefined') {
+      if (axisData.right.individually === true) {
+        yAxisId = key;
+      } else {
+        yAxisId = 'right';
+      }
     }
   }
-);
+
+  return yAxisId;
+};
+
+export default function MultiplexChart({
+  xInterval = 0,
+  xAxisTick,
+  makeLabel,
+  className = '',
+  width = 500,
+  height = 300,
+  title,
+  isPercent,
+  data,
+  dataKeys,
+  legend = false,
+  variousColoredCells = false,
+  legendData,
+  keyLabel,
+  customizeData = {},
+  barLabel = false,
+  stackId,
+  yAxisData,
+  maxData,
+}) {
+  const theme = useTheme();
+  const { graph } = theme.palette;
+
+  const makeTootipContent = props => {
+    return renderTooltipContent({
+      ...props,
+      keyLabel,
+      isPercent,
+      customizeData,
+      dataKeys,
+      makeLabel,
+    });
+  };
+
+  const legendHeight = 35;
+  const tickFormatter = isPercent ? toPercent : numberFormatter;
+  const maxIndex = Object.keys(graph.color).length;
+  let colorIndex = 0;
+
+  const haveRightYAxis =
+    typeof yAxisData !== 'undefined' &&
+    Object.keys(yAxisData.right).length !== 0;
+  const { bar, line } = dataKeys;
+  return (
+    <CartWrap className={`${className}`} title={title}>
+      <div style={{ width, height }}>
+        <ResponsiveContainer>
+          <ComposedChart
+            // width={width}
+            // height={height}
+            data={data}
+            margin={{
+              top: 5,
+              right:
+                typeof yAxisData !== 'undefined' && !haveRightYAxis ? 0 : 30,
+              left: 40,
+              bottom: 5,
+            }}
+          >
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="name" tick={xAxisTick} interval={xInterval} />
+            {typeof yAxisData !== 'undefined' ? (
+              (() => {
+                const result = [
+                  ...makeYAxis({
+                    axisData: yAxisData.left,
+                    orientation: 'left',
+                    keyLabel,
+                    maxData,
+                  }),
+                ];
+
+                if (haveRightYAxis) {
+                  result.push(
+                    ...makeYAxis({
+                      axisData: yAxisData.right,
+                      orientation: 'right',
+                      keyLabel,
+                      maxData,
+                    })
+                  );
+                }
+                return result;
+              })()
+            ) : (
+              <YAxis
+                yAxisId="left"
+                orientation="left"
+                tickFormatter={tickFormatter}
+                domain={isPercent ? [0, 100] : [0, 'auto']}
+              />
+            )}
+            <Tooltip content={makeTootipContent} />
+            {legend &&
+              (typeof legendData === 'undefined' ? (
+                <Legend
+                  verticalAlign="top"
+                  // align="right"
+                  height={legendHeight}
+                  // wrapperStyle={{ marginRight: haveRightYAxis ? 50 : -10 }}
+                  formatter={(value, entry) => {
+                    return (
+                      <span>
+                        {typeof keyLabel === 'undefined'
+                          ? value
+                          : keyLabel[value]}
+                      </span>
+                    );
+                  }}
+                />
+              ) : (
+                <Legend
+                  height={legendHeight}
+                  verticalAlign="top"
+                  align="right"
+                  content={legendData}
+                />
+              ))}
+            {/* <Area
+            type="monotone"
+            dataKey="amt"
+            fill={graph.groundColor}
+            stroke={graph.line[1]}
+          /> */}
+            {Boolean(bar) &&
+              bar.map((key, idx) => {
+                const yAxisId = getYAxisId({ axisData: yAxisData, key });
+
+                return (
+                  <Bar
+                    yAxisId={yAxisId}
+                    stackId={stackId}
+                    key={key}
+                    dataKey={key}
+                    fill={
+                      variousColoredCells
+                        ? null
+                        : graph.color[colorIndex++ % maxIndex]
+                    }
+                    label={barLabel ? { position: 'top' } : null}
+                  >
+                    {data.map((d, index) =>
+                      variousColoredCells ? (
+                        <Cell
+                          key={`cell-${key}`}
+                          fill={graph.color[colorIndex++ % maxIndex]}
+                        />
+                      ) : (
+                        <Cell key={`cell-${key}`} />
+                      )
+                    )}
+                  </Bar>
+                );
+              })}
+            {Boolean(line) &&
+              line.map(key => {
+                const yAxisId = getYAxisId({ axisData: yAxisData, key });
+
+                return (
+                  <Line
+                    key={key}
+                    yAxisId={yAxisId}
+                    type="monotone"
+                    dataKey={key}
+                    stroke={graph.color[colorIndex++ % maxIndex]}
+                  />
+                );
+              })}
+          </ComposedChart>
+        </ResponsiveContainer>
+      </div>
+    </CartWrap>
+  );
+}

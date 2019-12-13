@@ -1,7 +1,7 @@
 import { createAction, handleActions } from 'redux-actions';
 import { takeLatest } from 'redux-saga/effects';
 import createRequestSaga, {
-  createRequestActionTypes
+  createRequestActionTypes,
 } from 'lib/createRequestSaga';
 import * as commonAPI from 'lib/api/common';
 
@@ -13,7 +13,7 @@ const CHANGE_LOCALE = 'locale/CHANGE_LOCALE';
 const [
   SET_LOCALE,
   SET_LOCALE_SUCCESS,
-  SET_LOCALE_FAILURE
+  SET_LOCALE_FAILURE,
 ] = createRequestActionTypes('locale/SET_LOCALE');
 
 /**
@@ -27,6 +27,18 @@ export const changeLocale = createAction(CHANGE_LOCALE, locale => locale);
 export const setLocale = createAction(SET_LOCALE, locale => locale);
 
 /**
+ * 스토리지에 locale 담기
+ * @param {string} locale
+ */
+const setStorage = locale => {
+  try {
+    localStorage.setItem('locale', locale);
+  } catch (e) {
+    console.log('localStorage is not working');
+  }
+};
+
+/**
  * saga
  */
 const setLocaleSaga = createRequestSaga(SET_LOCALE, commonAPI.setLocale);
@@ -38,12 +50,14 @@ export function* localeSaga() {
 
 export function* changeLocaleSaga() {
   yield takeLatest([CHANGE_LOCALE], function* changeLocale(action) {
-    try {
-      yield localStorage.setItem('locale', action.payload);
-    } catch (e) {
-      console.log('localStorage is not working');
-    }
+    yield setStorage(action.payload);
     window.location.reload();
+  });
+}
+
+export function* localeSetStorageSaga() {
+  yield takeLatest([INITIALIZE_LOCALE], function* setLocale(action) {
+    yield setStorage(action.payload);
   });
 }
 
@@ -52,7 +66,7 @@ export function* changeLocaleSaga() {
  */
 const initialState = {
   locale: null,
-  error: null
+  error: null,
 };
 
 /**
@@ -64,7 +78,7 @@ const locale = handleActions(
       return {
         ...state,
         error: null,
-        locale: payload
+        locale: payload,
       };
     },
     [SET_LOCALE_SUCCESS]: (state, { payload, actionPayload }) => {
@@ -73,12 +87,12 @@ const locale = handleActions(
       return {
         ...state,
         error: success ? null : 'server error',
-        locale: actionPayload
+        locale: actionPayload,
       };
     },
     [SET_LOCALE_FAILURE]: (state, { payload: errorMessage }) => {
       return { ...state, error: errorMessage };
-    }
+    },
   },
   initialState
 );

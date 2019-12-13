@@ -12,7 +12,7 @@ import Header from 'components/organisms/Header/Header';
 const HeaderContainer = ({ history }) => {
   const dispatch = useDispatch();
   const { user } = useSelector(({ auth }) => ({
-    user: auth.user
+    user: auth.user,
   }));
 
   /**

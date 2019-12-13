@@ -1,13 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-
+import { useTranslation } from 'react-i18next';
+import { makeStyles } from '@material-ui/core/styles';
+import { Button } from '@material-ui/core';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
 import { logout, setUser } from 'modules/auth';
 import { getMenu } from 'modules/menu';
 import { login } from 'lib/api/auth';
 import LoginForm from 'pages/Login/LoginForm/LoginForm';
 
+const useStyles = makeStyles(theme => ({
+  modalTitleContent: {
+    marginBottom: 20,
+  },
+  modalConfirmButton: {
+    width: 200,
+    color: '#fff',
+  },
+}));
+
 const LoginFormContainer = ({ history }) => {
+  const classes = useStyles();
+  const { t } = useTranslation();
   const localStorageId = localStorage.getItem('saveId');
   const [form, setForm] = useState({
     userId: localStorageId === null ? '' : localStorageId,
@@ -15,12 +32,13 @@ const LoginFormContainer = ({ history }) => {
   });
   const [error, setError] = useState(null);
   const [saveId, setSaveId] = useState(localStorageId === null ? false : true);
+  const [modalState, setModalState] = useState(false);
 
   const dispatch = useDispatch();
-  // const { user, authError } = useSelector(({ auth }) => ({
-  //   user: auth.user,
-  //   authError: auth.authError
-  // }));
+
+  const handleModalClose = () => {
+    setModalState(false);
+  };
 
   /**
    * id, pwd 변경 이벤트
@@ -70,6 +88,8 @@ const LoginFormContainer = ({ history }) => {
               console.log('localStorage is not working');
             }
             history.push('/');
+          } else {
+            setModalState(true);
           }
         })
         .catch(error => {
@@ -85,14 +105,45 @@ const LoginFormContainer = ({ history }) => {
   }, [dispatch]);
 
   return (
-    <LoginForm
-      form={form}
-      error={error}
-      saveId={saveId}
-      onChange={onChange}
-      onChangeCheckbox={onChangeSaveId}
-      onSubmit={onSubmit}
-    />
+    <>
+      <LoginForm
+        form={form}
+        error={error}
+        saveId={saveId}
+        onChange={onChange}
+        onChangeCheckbox={onChangeSaveId}
+        onSubmit={onSubmit}
+      />
+
+      <Modal
+        aria-labelledby="transition-modal-title"
+        aria-describedby="transition-modal-description"
+        className={`${classes.modal} globalModal`}
+        open={modalState}
+        onClose={handleModalClose}
+        closeAfterTransition
+        BackdropComponent={Backdrop}
+        BackdropProps={{
+          timeout: 500,
+        }}
+      >
+        <Fade in={modalState}>
+          <div className={`${classes.paper} paper`}>
+            <p className={classes.modalTitleContent}>
+              {t('로그인에 실패하였습니다. 관리자에게 문의해주세요.')}
+            </p>
+            <Button
+              variant="contained"
+              color="primary"
+              className={classes.modalConfirmButton}
+              onClick={handleModalClose}
+            >
+              {t('확인')}
+            </Button>
+          </div>
+        </Fade>
+      </Modal>
+    </>
   );
 };
 

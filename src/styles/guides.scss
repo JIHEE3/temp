@@ -1,0 +1,58 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+#guide {
+  width: 100%;
+  min-width: 1000px;
+  margin: 0 auto 50px;
+}
+.header {
+  width: 100%;
+  height: 100px;
+  padding: 35px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  background: #309656;
+  text-align: center;
+  > h1 {
+    color: #fff;
+    font-size: 24px;
+  }
+}
+
+section {
+  max-width: 1400px;
+  margin: 0 auto;
+  table,
+  th,
+  td {
+    border: 1px solid #000;
+    border-collapse: collapse;
+    text-align: center;
+  }
+  table {
+    width: 100%;
+    min-width: 900px;
+    .tbodySection {
+      border-bottom: 4px solid #309656;
+    }
+    tr {
+      height: 30px;
+    }
+    tr:hover {
+      background: #efefef;
+    }
+    .unwork,
+    .complete {
+      font-weight: bold;
+    }
+    .unwork {
+      color: red;
+    }
+    .complete {
+      color: #309656;
+    }
+  }
+}

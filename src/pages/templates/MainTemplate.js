@@ -1,11 +1,19 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import clsx from 'clsx';
+import { withRouter } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
 
 import AdminNav from 'components/organisms/Nav/AdminNav';
 import HeaderContainer from 'components/organisms/Header/HeaderContainer';
 
+import { Scrollbars } from 'react-custom-scrollbars';
+
+import { curMenu } from 'modules/menu';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGreaterThan } from '@fortawesome/pro-solid-svg-icons';
 const drawerWidth = 250;
 
 const adminTemplateStyles = makeStyles(theme => ({
@@ -17,14 +25,16 @@ const adminTemplateStyles = makeStyles(theme => ({
     // position: 'fixed',
     // height: '500px',
     position: 'absolute',
-    display: 'flex',
+    // display: 'flex',
     flex: '1 0 auto',
     top: '70px',
     bottom: '0',
+    overflow: 'hidden',
     left: theme.spacing(7) + 1,
     [theme.breakpoints.up('sm')]: {
       left: theme.spacing(9) + 1,
     },
+    backgroundColor: '#eef2f5',
     right: 0,
     // overflow: 'auto',
     overflowX: 'hidden',
@@ -54,6 +64,19 @@ const adminTemplateStyles = makeStyles(theme => ({
       boxSizing: 'border-box',
     },
   },
+  mainSectionScroll: {
+    boxSizing: 'border-box',
+    padding: '0 !important',
+    overflow: 'initial',
+    '& > div': {
+      '& > div:not(:first-child)': {
+        width: 'calc(100% - 24px)',
+        paddingLeft: 24,
+        paddingBottom: 24,
+        boxSizing: 'border-box',
+      },
+    },
+  },
   drawerOpen: {
     width: drawerWidth,
     transition: theme.transitions.create('width', {
@@ -72,19 +95,65 @@ const adminTemplateStyles = makeStyles(theme => ({
       width: theme.spacing(9) + 1,
     },
   },
+  breadcrumbs: {
+    color: theme.palette.primary.breadcrumbs,
+  },
+  currentLocation: {
+    color: theme.palette.primary.breadcrumbsAccent,
+  },
+  greaterThan: {
+    margin: '4px 8px 0',
+    color: theme.palette.primary.breadcrumbsGreaterThan,
+  },
 }));
 
 let navOpenVal = true;
+/**
+ * 현제 url 에 맞는 url path 리턴
+ * @param {Map} menu
+ * @param {string} curUrl
+ */
+const makeMenuMap = (menu, curUrl) => {
+  let result = null;
+  for (let curMenu of menu.values()) {
+    if (result !== null) {
+      break;
+    }
+    if (curMenu.menuUrl === curUrl) {
+      result = curMenu.menuPathNm;
+      break;
+    } else if (typeof curMenu.subMenu !== 'undefined') {
+      result = makeMenuMap(curMenu.subMenu, curUrl);
+    }
+  }
+  return result;
+};
 
-const MainTemplate = ({ children }) => {
+const MainTemplate = ({ location, children }) => {
+  const dispatch = useDispatch();
   const classes = adminTemplateStyles();
   const [navOpen, setNavOpen] = React.useState(navOpenVal);
+  const { menu } = useSelector(({ menu }) => ({
+    menu,
+  }));
+  const [path, setPath] = React.useState([]);
+
+  useEffect(() => {
+    let curMenuPath = menu.curMenu;
+    if (menu.list !== null && curMenuPath === '') {
+      curMenuPath = makeMenuMap(menu.list, location.pathname);
+      if (curMenuPath === null) {
+        return;
+      }
+      dispatch(curMenu(curMenuPath));
+    }
+    setPath(curMenuPath.split('>'));
+  }, [menu, location, dispatch]);
 
   function handleDrawerToggle() {
     navOpenVal = !navOpen;
     setNavOpen(navOpenVal);
   }
-
   return (
     <div className={clsx('mb-AdminTemplate', classes.root)}>
       <HeaderContainer />
@@ -105,10 +174,37 @@ const MainTemplate = ({ children }) => {
         <AdminNav navOpen={navOpen} handleDrawerToggle={handleDrawerToggle} />
       </Drawer>
       <div className={clsx(classes.content, { navOpen })}>
-        <div>{children}</div>
+        <Scrollbars className={classes.mainSectionScroll}>
+          <div id="menuCrum" className="globals-Breadcrumbs">
+            {path.map((menuPath, index, array) => {
+              let result = null;
+              menuPath = menuPath.trim();
+              if (index + 1 === array.length) {
+                result = (
+                  <div key={index} className={classes.currentLocation}>
+                    {menuPath}
+                  </div>
+                );
+              } else {
+                result = (
+                  <div key={index} className={classes.breadcrumbs}>
+                    {menuPath}
+                    <FontAwesomeIcon
+                      icon={faGreaterThan}
+                      className={classes.greaterThan}
+                    />
+                  </div>
+                );
+              }
+
+              return result;
+            })}
+          </div>
+          <div>{children}</div>
+        </Scrollbars>
       </div>
     </div>
   );
 };
 
-export default MainTemplate;
+export default withRouter(MainTemplate);

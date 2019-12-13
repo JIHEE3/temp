@@ -14,14 +14,14 @@ let form = {
   email: '',
   phoneNumber: '',
   department: '',
-  rank: ''
+  rank: '',
 };
 const Join = ({ history }) => {
   const { t } = useTranslation();
   const [errorMessage, setErrorMessage] = React.useState({});
   const [alert, setAlert] = React.useState({
     open: false,
-    message: '필수 정보를 정확히 입력해주세요.'
+    message: '필수 정보를 정확히 입력해주세요.',
   });
 
   /**
@@ -116,7 +116,7 @@ const Join = ({ history }) => {
     }
 
     setErrorMessage({
-      ...newErrorMessage
+      ...newErrorMessage,
     });
   };
 
@@ -162,7 +162,7 @@ const Join = ({ history }) => {
           email,
           phoneNumber,
           department,
-          rank
+          rank,
         } = form;
         register({
           userId: id,
@@ -172,7 +172,7 @@ const Join = ({ history }) => {
           email: `${email}@enliple.com`,
           phone: phoneNumber,
           department,
-          rank
+          rank,
         })
           .then(response => {
             const { data } = response;
@@ -184,7 +184,7 @@ const Join = ({ history }) => {
             console.log(error);
             setAlert({
               open: true,
-              message: error
+              message: error,
             });
           });
       } else {
@@ -220,7 +220,7 @@ const Join = ({ history }) => {
       <Snackbar
         anchorOrigin={{
           vertical: 'top',
-          horizontal: 'center'
+          horizontal: 'center',
         }}
         open={alert.open}
         autoHideDuration={3000}

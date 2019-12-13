@@ -40,7 +40,6 @@ client.interceptors.response.use(
         window.location.replace('/login');
       }
     }
-
     const error = (data && data.message) || statusText;
     return Promise.reject(error);
   }
