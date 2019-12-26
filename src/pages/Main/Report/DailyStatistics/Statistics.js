@@ -7,6 +7,10 @@ import { makeRowColumn, getHeadObj } from 'lib/commonLib';
 
 import FilterWrap from 'components/atoms/FilterWrap';
 import StatisticsCommonFilter from 'components/organisms/StatisticsCommonFilter';
+import MyWindowPortal from 'components/molecules/WindowPortal';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faExternalLink } from '@fortawesome/pro-solid-svg-icons';
 
 import StatisticsGraph from './StatisticsGraph';
 
@@ -18,17 +22,29 @@ const useStyles = makeStyles(theme => ({
     float: 'right',
     color: theme.palette.table.cell.shoppingContent,
   },
+  icoBox: {
+    fontSize: 15,
+    float: 'left',
+    color: '#4d5059',
+    cursor: 'pointer',
+    marginRight: 10,
+  },
 }));
 
 let initialization = false;
+let initParam = {};
 const Statistics = () => {
   // const { t } = useTranslation();
   const classes = useStyles();
-  const initParam = {};
 
   // 공통 필터에서 초기값 받아왔는지 확인
   const [getInitParam, setGetInitParam] = useState(false);
   const [params, setParams] = useState(initParam);
+  const [showWindowPortal, setShowWindowPortal] = useState(false);
+
+  const handlePortalClose = () => {
+    setShowWindowPortal('');
+  };
 
   useEffect(() => {
     // 렌더링 후에 실행됨
@@ -38,6 +54,95 @@ const Statistics = () => {
 
   // header 및 body 컬럼 커스텀
   const customized = {
+    STATS_DTTM: {
+      makeHead: headsMap => {
+        return `${getHeadObj(headsMap, 'STATS_DTTM').label}`;
+      },
+      makeBody: (rowObj, headsMap) => {
+        const statsDttm = getHeadObj(headsMap, 'STATS_DTTM');
+        const showWindowUrl =
+          '/report/media?sDate=' +
+          rowObj['STATS_DTTM'] +
+          '&eDate=' +
+          rowObj['STATS_DTTM'] +
+          '&uri=/report/media&isPop=1';
+
+        let resultComponent;
+        if (rowObj.isChild) {
+          resultComponent = (
+            <>
+              {makeRowColumn(
+                rowObj['STATS_DTTM'],
+                statsDttm.type,
+                statsDttm.format
+              )}
+            </>
+          );
+        } else {
+          resultComponent = (
+            <>
+              {makeRowColumn(
+                rowObj['STATS_DTTM'],
+                statsDttm.type,
+                statsDttm.format
+              )}
+
+              <div className={classes.icoBox}>
+                <FontAwesomeIcon
+                  icon={faExternalLink}
+                  onClick={e => setShowWindowPortal(showWindowUrl)}
+                />
+              </div>
+            </>
+          );
+        }
+        return resultComponent;
+      },
+    },
+    CLICK_CNT: {
+      makeHead: headsMap => {
+        return `${getHeadObj(headsMap, 'CLICK_CNT').label}`;
+      },
+      makeBody: (rowObj, headsMap) => {
+        const clickCnt = getHeadObj(headsMap, 'CLICK_CNT');
+        const showWindowUrl =
+          '/report/adver/statistics?sDate=' +
+          rowObj['STATS_DTTM'] +
+          '&eDate=' +
+          rowObj['STATS_DTTM'] +
+          '&uri=/report/adver/statistics&isPop=1';
+        let resultComponent;
+        if (rowObj.isChild) {
+          resultComponent = (
+            <>
+              {makeRowColumn(
+                rowObj['CLICK_CNT'],
+                clickCnt.type,
+                clickCnt.format
+              )}
+            </>
+          );
+        } else {
+          resultComponent = (
+            <>
+              {makeRowColumn(
+                rowObj['CLICK_CNT'],
+                clickCnt.type,
+                clickCnt.format
+              )}
+
+              <div className={classes.icoBox}>
+                <FontAwesomeIcon
+                  icon={faExternalLink}
+                  onClick={e => setShowWindowPortal(showWindowUrl)}
+                />
+              </div>
+            </>
+          );
+        }
+        return resultComponent;
+      },
+    },
     ADVER_CNT: {
       makeHead: headsMap => {
         return `${getHeadObj(headsMap, 'ADVER_CNT').label}`;
@@ -442,7 +547,14 @@ const Statistics = () => {
   };
 
   const getParam = newParams => {
+    if (getInitParam === false) {
+      initParam = {
+        ...initParam,
+        ...newParams,
+      };
+    }
     setGetInitParam(true);
+
     setParams({
       ...params,
       ...newParams,
@@ -474,6 +586,14 @@ const Statistics = () => {
             childColumnSet={childColumnSet}
           />
         </>
+      )}
+      {showWindowPortal && (
+        //sudo App.js 로 빼야할지 고민 다른탭 이동하면 사라지므로
+        <MyWindowPortal
+          url={showWindowPortal}
+          handleUnmount={handlePortalClose}
+          windowFeatures="width=1500,height=700"
+        />
       )}
     </>
   );

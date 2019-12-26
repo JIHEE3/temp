@@ -259,7 +259,7 @@ class MbTableRow extends React.Component {
       index,
       isTotal,
       handleClick,
-      row,
+      row = {},
       expandTable,
     } = this.props;
     const { onClick } = this;
@@ -354,7 +354,7 @@ export default withStyles(styles)(
         headCells,
         list = [],
         hasTotal,
-        totalList,
+        totalList = null,
         selected = [],
         hasCheckbox,
         handleClick = f => f,

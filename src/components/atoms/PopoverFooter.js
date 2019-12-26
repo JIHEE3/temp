@@ -11,8 +11,8 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function PopoverFooter({ children }) {
+export default function PopoverFooter({ className = '', children }) {
   const classes = useStyles();
 
-  return <div className={classes.root}>{children}</div>;
+  return <div className={`${classes.root} ${className}`}>{children}</div>;
 }

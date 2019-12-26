@@ -1,5 +1,7 @@
 import React from 'react';
 import { withTranslation } from 'react-i18next';
+import { withRouter } from 'react-router-dom';
+import queryString from 'query-string';
 import { connect } from 'react-redux';
 import moment from 'moment';
 import { getDate } from 'lib/commonLib';
@@ -18,13 +20,16 @@ let initParam = {};
 class StatisticsCommonFilter extends React.Component {
   constructor(props) {
     super(props);
-
+    sDate = null;
+    eDate = null;
+    initParam = {};
     const {
       t,
       platformCodeList: pCodeList,
       getParam,
       initData = {},
       noneDate,
+      location,
     } = props;
     const now = moment();
 
@@ -37,6 +42,14 @@ class StatisticsCommonFilter extends React.Component {
       }
       if (typeof initData.eDate !== 'undefined') {
         eDate = moment(initData.eDate, 'YYYYMMDD');
+      }
+
+      const query = queryString.parse(location.search);
+      if (typeof query.sDate !== 'undefined') {
+        sDate = moment(query.sDate, 'YYYYMMDD');
+      }
+      if (typeof query.eDate !== 'undefined') {
+        eDate = moment(query.eDate, 'YYYYMMDD');
       }
 
       initParam = {
@@ -65,20 +78,23 @@ class StatisticsCommonFilter extends React.Component {
 
   componentDidUpdate(prevProps, prevState) {
     const { initialization, getParam } = this.props;
-    const { params } = this.state;
+    let { params } = this.state;
     const { params: prevParams } = prevState;
 
     if (initialization) {
-      this.setState({
-        ...this.state,
-        params: {
-          ...initParam,
-        },
-        advrtsTpCodeJson: {},
-      });
+      if (JSON.stringify(this.state) !== JSON.stringify(prevState)) {
+        this.setState({
+          ...this.state,
+          params: {
+            ...initParam,
+          },
+          advrtsTpCodeJson: {},
+        });
+        params = { ...initParam };
+      }
     }
 
-    if (params !== prevParams) {
+    if (JSON.stringify(params) !== JSON.stringify(prevParams)) {
       getParam(params);
     }
   }
@@ -229,5 +245,5 @@ export default withTranslation()(
   connect(
     ({ common }) => ({ platformCodeList: common.platformCodeList }),
     null
-  )(StatisticsCommonFilter)
+  )(withRouter(StatisticsCommonFilter))
 );

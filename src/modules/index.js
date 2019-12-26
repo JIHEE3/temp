@@ -1,6 +1,10 @@
 import { combineReducers } from 'redux';
 import { all } from 'redux-saga/effects';
-import common, { externalCodeSaga, memberFilterSaga } from './common';
+import common, {
+  externalCodeSaga,
+  memberFilterSaga,
+  getCategorySaga,
+} from './common';
 import auth, { authSaga } from './auth';
 import menu, { menuSaga } from './menu';
 import locale, {
@@ -22,6 +26,7 @@ export function* rootSaga() {
   yield all([
     externalCodeSaga(),
     memberFilterSaga(),
+    getCategorySaga(),
     authSaga(),
     menuSaga(),
     localeSaga(),

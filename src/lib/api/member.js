@@ -47,3 +47,81 @@ export const members = param => client.get(`/api/manage/members`, param);
 export const usersSearch = () => client.get(`/api/layout/member/search`);
 
 export const getUserInfo = () => client.get('/api/user');
+
+// 모비온 사용자 입금
+export const deposit = ({
+  userId,
+  rsvDate: date,
+  price,
+  name,
+  payType,
+  rsvTime,
+  weekType,
+}) =>
+  client.post(
+    `/api/manage/members/${userId}/deposit`,
+    qs.stringify(
+      {
+        userId,
+        rsvDate: date,
+        price,
+        name,
+        payType,
+        rsvTime,
+        weekType,
+      },
+      {
+        skipNulls: true,
+        filter: function filterFunc(prefix, value) {
+          for (let item in value) {
+            if (value.hasOwnProperty(item)) {
+              const cur = value[item];
+              if (cur === '') {
+                value[item] = null;
+              }
+            }
+          }
+          return value;
+        },
+      }
+    )
+  );
+
+// 모비온 사용자 보너스충전
+export const chargeBonus = ({
+  userId,
+  bonus: price,
+  restRsnCode,
+  memo,
+  rsvDate: date,
+  rsvTime,
+  weekType,
+}) =>
+  client.post(
+    `/api/manage/members/${userId}/bonus`,
+    qs.stringify(
+      {
+        userId,
+        bonus: price,
+        restRsnCode,
+        memo,
+        rsvDate: date,
+        rsvTime,
+        weekType,
+      },
+      {
+        skipNulls: true,
+        filter: function filterFunc(prefix, value) {
+          for (let item in value) {
+            if (value.hasOwnProperty(item)) {
+              const cur = value[item];
+              if (cur === '') {
+                value[item] = null;
+              }
+            }
+          }
+          return value;
+        },
+      }
+    )
+  );

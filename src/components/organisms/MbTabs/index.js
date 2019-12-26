@@ -148,6 +148,7 @@ function initSetting(props, state, valueSet) {
   const {
     history,
     match,
+    location,
     tabMenuList,
     name,
     tabs,
@@ -160,12 +161,17 @@ function initSetting(props, state, valueSet) {
   let url = null;
 
   if (valueSet) {
-    if (match.path === value) {
+    if (match.path === value && location.search === '') {
       // 사이드바에서 해당메뉴 클릭해서 들어온 경우
       value = tabMenuList.keys().next().value;
       url = value;
     } else {
       let tempCnt = 0;
+      if (value.lastIndexOf('/') + 1 === value.length) {
+        // url 마지막에 / 추가된 경우
+        value = value.slice(0, value.lastIndexOf('/'));
+      }
+
       for (let path of tabMenuList.keys()) {
         if (value === path) {
           break;
@@ -261,6 +267,7 @@ export default withRouter(
           // tab url 이 null 인 경우
           console.log('탭 메뉴 url을 넣어주세요');
         } else {
+          getCurTab(newValue);
           if (!isModal && changeUrl) {
             history.push(newValue);
           }

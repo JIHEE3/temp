@@ -32,21 +32,40 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-export default function SearchInput({ placeholder = '' }) {
+export default function SearchInput({
+  placeholder = '',
+  handleSearch = f => f,
+  className = '',
+  inputRef = React.createRef(),
+}) {
   const classes = useStyles();
   const theme = useTheme();
 
+  const handleOnKeyDown = e => {
+    const { keyCode } = e;
+    if (keyCode === 13) {
+      search();
+    }
+  };
+
+  const search = () => {
+    handleSearch(inputRef.current.value);
+  };
+
   return (
-    <Paper component="form" className={classes.root}>
+    <Paper component="div" className={`${classes.root} ${className}`}>
       <InputBase
         className={classes.input}
         placeholder={placeholder}
         inputProps={{ 'aria-label': 'search google maps' }}
+        onKeyDown={handleOnKeyDown}
+        inputRef={inputRef}
       />
       <IconButton
         type="button"
         className={classes.iconButton}
         aria-label="search"
+        onClick={search}
       >
         <FontAwesomeIcon
           icon={faSearch}

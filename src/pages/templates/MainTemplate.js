@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import clsx from 'clsx';
 import { withRouter } from 'react-router-dom';
+import queryString from 'query-string';
 import { useSelector, useDispatch } from 'react-redux';
 import { makeStyles } from '@material-ui/core/styles';
 import Drawer from '@material-ui/core/Drawer';
@@ -40,6 +41,10 @@ const adminTemplateStyles = makeStyles(theme => ({
     overflowX: 'hidden',
     '&.navOpen': {
       left: drawerWidth,
+    },
+    '&.navPop': {
+      left: 0,
+      top: 0,
     },
     '& > div': {
       position: 'relative',
@@ -137,6 +142,7 @@ const MainTemplate = ({ location, children }) => {
     menu,
   }));
   const [path, setPath] = React.useState([]);
+  const { isPop } = queryString.parse(location.search);
 
   useEffect(() => {
     let curMenuPath = menu.curMenu;
@@ -154,26 +160,38 @@ const MainTemplate = ({ location, children }) => {
     navOpenVal = !navOpen;
     setNavOpen(navOpenVal);
   }
+
   return (
     <div className={clsx('mb-AdminTemplate', classes.root)}>
-      <HeaderContainer />
-      <Drawer
-        variant="permanent"
-        className={clsx(classes.drawer, {
-          [classes.drawerOpen]: navOpen,
-          [classes.drawerClose]: !navOpen,
-        })}
-        classes={{
-          paper: clsx({
+      {typeof isPop === 'undefined' ? <HeaderContainer /> : ''}
+      {typeof isPop === 'undefined' ? (
+        <Drawer
+          variant="permanent"
+          className={clsx(classes.drawer, {
             [classes.drawerOpen]: navOpen,
             [classes.drawerClose]: !navOpen,
-          }),
-        }}
-        open={navOpen}
+          })}
+          classes={{
+            paper: clsx({
+              [classes.drawerOpen]: navOpen,
+              [classes.drawerClose]: !navOpen,
+            }),
+          }}
+          open={navOpen}
+        >
+          <AdminNav navOpen={navOpen} handleDrawerToggle={handleDrawerToggle} />
+        </Drawer>
+      ) : (
+        ''
+      )}
+
+      <div
+        className={
+          typeof isPop === 'undefined'
+            ? clsx(classes.content, { navOpen })
+            : clsx(classes.content, 'navPop')
+        }
       >
-        <AdminNav navOpen={navOpen} handleDrawerToggle={handleDrawerToggle} />
-      </Drawer>
-      <div className={clsx(classes.content, { navOpen })}>
         <Scrollbars className={classes.mainSectionScroll}>
           <div id="menuCrum" className="globals-Breadcrumbs">
             {path.map((menuPath, index, array) => {

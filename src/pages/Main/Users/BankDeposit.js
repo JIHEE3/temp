@@ -1,9 +1,6 @@
 import React from 'react';
 
 import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
-import moment from 'moment';
-import { SingleDatePicker } from 'react-dates';
 
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/styles';
@@ -14,7 +11,7 @@ import FormControl from '@material-ui/core/FormControl';
 import OutlinedInput from '@material-ui/core/OutlinedInput';
 import ModalButton from 'components/atoms/ModalButton';
 
-import { getDate } from 'lib/commonLib';
+import DatePicker from 'components/organisms/DatePicker/SingleDate';
 
 const bankDepositStyle = makeStyles(theme => ({
   form: {
@@ -85,10 +82,10 @@ const bankDepositStyle = makeStyles(theme => ({
 }));
 
 const BankDeposit = props => {
-  const { userId, date, price, name, payType, changeValue } = props;
+  // const { userId, date, price, priceError, name, changeValue } = props;
+  const { userId, price, priceError, name, changeValue } = props;
   const classes = bankDepositStyle();
   const { t } = useTranslation();
-
   return (
     <>
       <form className={classes.form} noValidate>
@@ -114,22 +111,22 @@ const BankDeposit = props => {
                   <FormControl variant="outlined">
                     <OutlinedInput
                       name="price"
-                      value={price.value}
+                      value={price}
                       onChange={changeValue('price')}
                       className={`smallInput ${classes.textField}`}
                       classes={{
                         notchedOutline: classes.border,
                       }}
-                      error={price.error}
+                      error={priceError.error}
                       endAdornment={
                         <InputAdornment position="end">
                           {t('원')}
                         </InputAdornment>
                       }
                     />
-                    {price.error === true ? (
+                    {priceError.error === true ? (
                       <FormHelperText className={classes.errorMessage}>
-                        {price.message}
+                        {priceError.message}
                       </FormHelperText>
                     ) : (
                       <></>
@@ -186,7 +183,7 @@ const BankDeposit = props => {
                 <FormControl variant="outlined">
                   <OutlinedInput
                     name="name"
-                    // value={name}
+                    defaultValue={name}
                     onChange={changeValue('name')}
                     className={`smallInput ${classes.textField}`}
                     classes={{
@@ -196,59 +193,12 @@ const BankDeposit = props => {
                 </FormControl>
               </td>
             </tr>
-            <tr>
-              <th>값 확인하기</th>
-              <td>
-                userId: {userId}
-                <br />
-                date: {date}
-                <br />
-                price: {price.value}
-                <br />
-                name: {name}
-                <br />
-                payType: {payType}
-              </td>
-            </tr>
           </tbody>
         </table>
       </form>
     </>
   );
 };
-
-class DatePicker extends React.Component {
-  state = {
-    focused: false,
-    date: moment(),
-  };
-
-  HANDLE_TEST_FUNCTION = date => {
-    const { changeValue } = this.props;
-
-    let clickDate = moment(date.format('YYYY-MM-01'));
-    let conversionDate = getDate(clickDate);
-    this.setState({ conversionDate });
-
-    console.log(conversionDate);
-    changeValue('date')(conversionDate);
-  };
-
-  render() {
-    const { HANDLE_TEST_FUNCTION } = this;
-
-    return (
-      <SingleDatePicker
-        numberOfMonths={1}
-        onDateChange={date => HANDLE_TEST_FUNCTION(date)}
-        onFocusChange={({ focused }) => this.setState({ focused })}
-        focused={this.state.focused}
-        date={this.state.date}
-        monthFormat="MMMM YYYY"
-      />
-    );
-  }
-}
 
 export default BankDeposit;
 // export default ;

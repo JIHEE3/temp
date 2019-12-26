@@ -1,13 +1,9 @@
 import React from 'react';
 
 import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
-import moment from 'moment';
-import { SingleDatePicker } from 'react-dates';
 
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/styles';
-import Checkbox from '@material-ui/core/Checkbox';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormHelperText from '@material-ui/core/FormHelperText';
@@ -17,6 +13,10 @@ import Select from '@material-ui/core/Select';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import ModalButton from 'components/atoms/ModalButton';
 import ButtonGroup from '@material-ui/core/ButtonGroup';
+
+import MbCheckbox from 'components/atoms/MbCheckbox';
+import DatePicker from 'components/organisms/DatePicker/SingleDate';
+import clsx from 'clsx';
 
 const bankDepositStyle = makeStyles(theme => ({
   form: {
@@ -83,13 +83,16 @@ const bankDepositStyle = makeStyles(theme => ({
   },
   inlineBox: {
     '& > div': {
-      display: 'inline-block',
       marginRight: 10,
       '&:last-child': {
         marginRight: 0,
       },
     },
+    '& .error .SingleDatePicker .DateInput_input ': {
+      border: '1px solid red',
+    },
   },
+
   selectSize: {
     padding: '7.5px 34px 7.5px 14px',
   },
@@ -103,6 +106,11 @@ const bankDepositStyle = makeStyles(theme => ({
     marginLeft: 0,
     color: '#f00',
   },
+  timeError: {
+    '& .timeError': {
+      border: '1px solid red',
+    },
+  },
 }));
 
 const DeferredPayment = props => {
@@ -110,18 +118,17 @@ const DeferredPayment = props => {
   const { t } = useTranslation();
   const {
     userId,
-    date,
-    name,
-    payType,
     price,
-    week,
+    priceError,
+    timeError,
+    dateError,
+    weeks,
     changeValue,
-    handleChackBox,
   } = props;
 
   return (
     <>
-      <form className={classes.form} autoComplete="off" noValidate>
+      <form className={classes.form} noValidate>
         <table>
           <tbody>
             <tr>
@@ -129,16 +136,24 @@ const DeferredPayment = props => {
               <td>{userId}</td>
             </tr>
             <tr>
-              <th>{t('예약 정보')}</th>
+              <th>{t('예약 일자')}</th>
               <td className={classes.inlineBox}>
-                <div>
-                  예약일자:&nbsp;
-                  <DatePicker className={'sampleClass'} />
-                </div>
-                <div>
-                  이전 예약 일자:&nbsp;
-                  <DatePicker className={'sampleClass'} />
-                </div>
+                {!dateError.error ? (
+                  <div>
+                    <DatePicker changeValue={changeValue} />
+                  </div>
+                ) : (
+                  <div className="error">
+                    <DatePicker changeValue={changeValue} />
+                    {dateError.error === true ? (
+                      <FormHelperText className={classes.errorMessage}>
+                        {dateError.message}
+                      </FormHelperText>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                )}
               </td>
             </tr>
             <tr>
@@ -148,97 +163,96 @@ const DeferredPayment = props => {
                   <FormGroup row>
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.all}
+                        <MbCheckbox
+                          checked={weeks.all}
                           name="all"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="all"
+                          color="#4ed1bd"
                         />
                       }
                       label="모든요일"
                     />
-
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.sun}
+                        <MbCheckbox
+                          checked={weeks.sun}
                           name="sun"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="sun"
+                          color="#4ed1bd"
                         />
                       }
                       label="일"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.mon}
+                        <MbCheckbox
+                          checked={weeks.mon}
                           name="mon"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="mon"
+                          color="#4ed1bd"
                         />
                       }
                       label="월"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.tue}
+                        <MbCheckbox
+                          checked={weeks.tue}
                           name="tue"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="tue"
+                          color="#4ed1bd"
                         />
                       }
                       label="화"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.wed}
+                        <MbCheckbox
+                          checked={weeks.wed}
                           name="wed"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="wed"
+                          color="#4ed1bd"
                         />
                       }
                       label="수"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.thu}
+                        <MbCheckbox
+                          checked={weeks.thu}
                           name="thu"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="thu"
+                          color="#4ed1bd"
                         />
                       }
                       label="목"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.fri}
+                        <MbCheckbox
+                          checked={weeks.fri}
                           name="fri"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="fri"
+                          color="#4ed1bd"
                         />
                       }
                       label="금"
                     />
                     <FormControlLabel
                       control={
-                        <Checkbox
-                          checked={week.sat}
+                        <MbCheckbox
+                          checked={weeks.sat}
                           name="sat"
-                          onChange={changeValue('week')}
-                          onClick={handleChackBox}
+                          onChange={changeValue('weeks')}
                           value="sat"
+                          color="#4ed1bd"
                         />
                       }
                       label="토"
@@ -254,28 +268,59 @@ const DeferredPayment = props => {
             </tr>
             <tr>
               <th>{t('충전 시간')}</th>
-              <td>
-                <FormControl
-                  variant="outlined"
-                  classes={{
-                    root: classes.selectArea,
-                  }}
-                >
-                  <Select
-                    native
+              <td className={classes.inlineBox}>
+                <div className={classes.timeError}>
+                  <FormControl
+                    variant="outlined"
                     classes={{
-                      select: classes.selectSize,
-                      root: classes.border,
+                      root: classes.selectArea,
                     }}
                   >
-                    <option value="" />
-                    <option value={10}>
-                      1시간 1시간 1시간 1시간 1시간 1시간 1시간 1시간
-                    </option>
-                    <option value={20}>2시간 2시간 2시간 2시간</option>
-                    <option value={30}>3시간 3시간 3시간 3시간</option>
-                  </Select>
-                </FormControl>
+                    <Select
+                      native
+                      onChange={changeValue('rsvTime')}
+                      name="rsvTime"
+                      className={clsx({ timeError: timeError.error })}
+                      classes={{
+                        select: classes.selectSize,
+                        root: classes.border,
+                      }}
+                    >
+                      <option value="">시간을 선택해주세요.</option>
+                      <option value={'0'}>00시</option>
+                      <option value={'01'}>01시</option>
+                      <option value={'02'}>02시</option>
+                      <option value={'03'}>03시</option>
+                      <option value={'04'}>04시</option>
+                      <option value={'05'}>05시</option>
+                      <option value={'06'}>06시</option>
+                      <option value={'07'}>07시</option>
+                      <option value={'08'}>08시</option>
+                      <option value={'09'}>09시</option>
+                      <option value={'10'}>10시</option>
+                      <option value={'11'}>11시</option>
+                      <option value={'12'}>12시</option>
+                      <option value={'13'}>13시</option>
+                      <option value={'14'}>14시</option>
+                      <option value={'15'}>15시</option>
+                      <option value={'16'}>16시</option>
+                      <option value={'17'}>17시</option>
+                      <option value={'18'}>18시</option>
+                      <option value={'19'}>19시</option>
+                      <option value={'20'}>20시</option>
+                      <option value={'21'}>21시</option>
+                      <option value={'22'}>22시</option>
+                      <option value={'23'}>23시</option>
+                    </Select>
+                  </FormControl>
+                  {timeError.error ? (
+                    <FormHelperText className={classes.errorMessage}>
+                      {timeError.message}
+                    </FormHelperText>
+                  ) : (
+                    <></>
+                  )}
+                </div>
               </td>
             </tr>
             <tr className={classes.verticalTop}>
@@ -285,22 +330,22 @@ const DeferredPayment = props => {
                   <FormControl variant="outlined">
                     <OutlinedInput
                       name="price"
-                      value={price.value}
+                      value={price}
                       onChange={changeValue('price')}
                       className={`smallInput ${classes.textField}`}
                       classes={{
                         notchedOutline: classes.border,
                       }}
-                      error={price.error}
+                      error={priceError.error}
                       endAdornment={
                         <InputAdornment position="end">
                           {t('원')}
                         </InputAdornment>
                       }
                     />
-                    {price.error === true ? (
+                    {priceError.error === true ? (
                       <FormHelperText className={classes.errorMessage}>
-                        {price.message}
+                        {priceError.message}
                       </FormHelperText>
                     ) : (
                       <></>
@@ -351,18 +396,6 @@ const DeferredPayment = props => {
                 </div>
               </td>
             </tr>
-            <tr>
-              <th>데이터 확인</th>
-              <td>
-                date: {date}
-                <br />
-                price: {price.value}
-                <br />
-                name: {name}
-                <br />
-                payType: {payType}
-              </td>
-            </tr>
           </tbody>
         </table>
       </form>
@@ -370,23 +403,4 @@ const DeferredPayment = props => {
   );
 };
 
-class DatePicker extends React.Component {
-  state = {
-    focused: false,
-    date: moment(),
-  };
-  render() {
-    return (
-      <SingleDatePicker
-        numberOfMonths={1}
-        onDateChange={date => this.setState({ date })}
-        onFocusChange={({ focused }) => this.setState({ focused })}
-        focused={this.state.focused}
-        date={this.state.date}
-      />
-    );
-  }
-}
-
 export default DeferredPayment;
-// export default ;

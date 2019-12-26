@@ -100,6 +100,7 @@ export default function CustomActiveShapePieChart({
   outerRadius = 80,
   dataKey,
   tooltipFormat = '',
+  legend = false,
 }) {
   const theme = useTheme();
   const { graph } = theme.palette;
@@ -117,7 +118,9 @@ export default function CustomActiveShapePieChart({
   return (
     <ChartWrap title={title} label={label}>
       <PieChart width={width} height={height}>
-        <Legend verticalAlign="top" align="left" layout="vertical" />
+        {legend && (
+          <Legend verticalAlign="top" align="left" layout="vertical" />
+        )}
         <Pie
           activeIndex={activeIndex}
           activeShape={makeActiveShape}

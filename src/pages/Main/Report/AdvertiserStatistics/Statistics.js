@@ -5,6 +5,8 @@ import {
   advertiserStatistics,
   advertiserStatisticsDetail,
 } from 'lib/api/report';
+import { withRouter } from 'react-router-dom';
+import queryString from 'query-string';
 
 import FilterWrap from 'components/atoms/FilterWrap';
 import StatisticsCommonFilter from 'components/organisms/StatisticsCommonFilter';
@@ -24,9 +26,10 @@ const useStyles = makeStyles(theme => ({
 }));
 
 let initialization = false;
-const Statistics = () => {
+let initParam = {};
+const Statistics = ({ location }) => {
   const classes = useStyles();
-  const initParam = {};
+  const { isPop } = queryString.parse(location.search);
 
   // 공통 필터에서 초기값 받아왔는지 확인
   const [getInitParam, setGetInitParam] = useState(false);
@@ -63,6 +66,12 @@ const Statistics = () => {
   };
 
   const getParam = newParams => {
+    if (getInitParam === false) {
+      initParam = {
+        ...initParam,
+        ...newParams,
+      };
+    }
     setGetInitParam(true);
     setParams({
       ...params,
@@ -80,7 +89,7 @@ const Statistics = () => {
       </FilterWrap>
       {getInitParam && (
         <>
-          <StatisticsGraph />
+          {typeof isPop === 'undefined' ? <StatisticsGraph /> : ''}
           <TableContainer
             className={classes.root}
             dataReqPromise={advertiserStatistics}
@@ -102,4 +111,4 @@ const Statistics = () => {
   );
 };
 
-export default Statistics;
+export default withRouter(Statistics);

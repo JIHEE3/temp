@@ -36,7 +36,6 @@ export default withStyles(tabpanelStyles)(
         children,
         ...other
       } = this.props;
-
       return (
         <Typography
           component="div"

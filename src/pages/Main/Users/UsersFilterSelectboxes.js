@@ -68,14 +68,6 @@ class UsersFilterSelectboxes extends React.Component {
       contact,
     };
 
-    for (let item in param) {
-      if (param.hasOwnProperty(item)) {
-        if (param[item] === null) {
-          delete param[item];
-        }
-      }
-    }
-
     return param;
   };
 

@@ -1,9 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { withTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/core/styles';
+import { withStyles } from '@material-ui/styles';
+import IconButton from '@material-ui/core/IconButton';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faBars } from '@fortawesome/pro-regular-svg-icons';
 
 import { issueReport } from 'lib/api/report';
-import { getCustom } from 'lib/api/common';
+import { getCustom, setCustom } from 'lib/api/common';
 import { makeHeadData, makeRowColumn } from 'lib/commonLib';
 
 import FilterWrap from 'components/atoms/FilterWrap';
@@ -11,8 +17,16 @@ import ManagerFilter from 'components/organisms/ManagerFilter';
 import StatisticsCommonFilter from 'components/organisms/StatisticsCommonFilter';
 import EnhancedTableWrap from 'components/molecules/MbTable/EnhancedTableWrap';
 import BasicTable from 'components/molecules/MbBasicTable';
+import SetUpList from 'components/molecules/SetUpList';
+import BasicPopover from 'components/molecules/BasicPopover';
+import MyWindowPortal from 'components/molecules/WindowPortal';
 
-const useStyles = makeStyles(theme => ({
+import issueIcon from 'images/common/table/issue.svg';
+import AdvertiserLoginIcon from 'images/common/table/advertiserLogin';
+import StatisticsIcon from 'images/common/table/statistics';
+import HomeIcon from 'images/common/table/home';
+
+const style = theme => ({
   tableRoot: {
     borderTop: theme.palette.box.border,
     '& .mb-issue-table:not(:last-child)': {
@@ -32,6 +46,12 @@ const useStyles = makeStyles(theme => ({
     marginBottom: 9,
   },
   issueTable: {
+    '& table': {
+      tableLayout: 'fixed',
+      '& td, & th': {
+        boxSizing: 'border-box',
+      },
+    },
     '& .mb-raf': {
       color: theme.palette.common.blue,
       '&.mb-minus': {
@@ -68,7 +88,7 @@ const useStyles = makeStyles(theme => ({
     // 일에산
     '&.BDGT': {
       '& .mb-siteName': {
-        width: 110,
+        width: '100%',
       },
       '& .mb-budgetLimit, & .mb-yAdvrtsAmt, & .mb-wAdvrtsAmt': {
         width: 98,
@@ -77,11 +97,75 @@ const useStyles = makeStyles(theme => ({
     // 중지 광고주
     '&.STOP_ADVER': {
       '& .mb-siteName': {
-        width: 190,
+        width: '100%',
+      },
+      '& .mb-point': {
+        width: 156,
       },
     },
   },
+});
+
+const siteButtonListStyles = makeStyles(theme => ({
+  root: {
+    '& > div:not(:first-child)': {
+      marginTop: 15,
+    },
+  },
+  button: {
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    '&:hover': {
+      color: theme.palette.primary.deep,
+      '& svg': {
+        fill: theme.palette.primary.deep,
+      },
+    },
+  },
+  title: {
+    marginLeft: 8,
+  },
 }));
+
+const SiteButtonList = ({ data }) => {
+  const { t } = useTranslation();
+  const classes = siteButtonListStyles();
+  const [showWindowPortal, setShowWindowPortal] = useState(false);
+
+  const handlePortalClose = () => {
+    setShowWindowPortal(false);
+  };
+
+  return (
+    <div className={classes.root}>
+      <div
+        className={classes.button}
+        onClick={e => console.log('광고주 로그인')}
+      >
+        <AdvertiserLoginIcon />
+        <div className={classes.title}>{t('광고주로 로그인')}</div>
+      </div>
+      <div className={classes.button} onClick={e => setShowWindowPortal(true)}>
+        <StatisticsIcon />
+        <div className={classes.title}>{t('광고주 통계')}</div>
+      </div>
+      <div className={classes.button} onClick={e => console.log('사이트 이동')}>
+        <HomeIcon />
+        <div className={classes.title}>{t('사이트 이동')}</div>
+      </div>
+
+      {/* App.js 로 빼야할지 고민 다른탭 이동하면 사라지므로 */}
+      {showWindowPortal && (
+        <MyWindowPortal
+          url="/report/daily/par?mcode=cherish&uri=/report/daily/par"
+          handleUnmount={handlePortalClose}
+          windowFeatures="width=1000,height=800"
+        />
+      )}
+    </div>
+  );
+};
 
 const tableInfoJson = {
   ADVRTS_AMT: {
@@ -272,6 +356,46 @@ const makeRafRow = data => {
 };
 
 const customized = {
+  SITE_NAME: {
+    makeBody: rowObj => {
+      return (
+        <div
+          style={{ width: 'inherit', display: 'flex', alignItems: 'center' }}
+        >
+          <BasicPopover
+            target={
+              <IconButton style={{ padding: 8 }}>
+                <FontAwesomeIcon
+                  icon={faBars}
+                  style={{
+                    fontSize: '17px',
+                  }}
+                />
+              </IconButton>
+            }
+            placement="bottom-start"
+          >
+            <SiteButtonList data={rowObj} />
+          </BasicPopover>
+          <div
+            style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+            title={rowObj.SITE_NAME}
+          >
+            <span
+              style={{
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {rowObj.SITE_NAME}
+            </span>
+          </div>
+        </div>
+      );
+    },
+  },
   ADVRTS_AMT_RAF: {
     makeBody: rowObj => {
       return makeRafRow(rowObj.ADVRTS_AMT_RAF);
@@ -306,62 +430,106 @@ const tableOrder = [
 ];
 
 let initialization = false;
-const IssueStatistics = () => {
-  const { t } = useTranslation();
-  const classes = useStyles();
-  const initParam = {};
-  const [loading, setLoading] = useState(false);
-  const [layoutList, setLayoutList] = useState({});
-  const [list, setList] = useState({});
-  // 공통 필터에서 초기값 받아왔는지 확인
-  const [getInitParam, setGetInitParam] = useState(false);
-  const [params, setParams] = useState(initParam);
-  const [selectedManagerIndex, setSelectedManagerIndex] = useState(0);
+let initParam = {};
+class IssueStatistics extends React.PureComponent {
+  constructor(props) {
+    super(props);
 
-  useEffect(() => {
-    initialization = false;
-  }, [params]);
+    this.state = {
+      loading: false,
+      layoutList: new Map(),
+      list: {},
+      // 공통 필터에서 초기값 받아왔는지 확인
+      getInitParam: false,
+      params: { ...initParam },
+      selectedManagerIndex: 0,
+    };
+  }
 
-  useEffect(() => {
-    setLoading(true);
-    getCustom({
-      layoutName: 'layout',
-    }).then(response => {
-      const { data } = response.data;
-      setLayoutList(data);
+  getData = () => {
+    const { params } = this.state;
+
+    this.setState({
+      ...this.state,
+      loading: true,
+      list: {},
     });
 
     issueReport({
       gubun: 11,
-      advrtsPrdtCode: '00',
-      advrtsTpCode: '00',
-      pltfomTpCode: '00',
+      ...params,
     }).then(response => {
-      setLoading(false);
       const {
-        ADVRTS_AMT,
-        BDGT,
-        NEW_ADVER,
-        ROAS,
-        STOP_ADVER,
+        ADVRTS_AMT = { data: [] },
+        BDGT = { data: [] },
+        NEW_ADVER = { data: [] },
+        ROAS = { data: [] },
+        STOP_ADVER = { data: [] },
       } = response.data.data;
-      setList({
-        ADVRTS_AMT: ADVRTS_AMT.data,
-        BDGT: BDGT.data,
-        NEW_ADVER: NEW_ADVER.data,
-        ROAS: ROAS.data,
-        STOP_ADVER: STOP_ADVER.data,
+
+      this.setState({
+        ...this.state,
+        loading: false,
+        list: {
+          ADVRTS_AMT: ADVRTS_AMT.data,
+          BDGT: BDGT.data,
+          NEW_ADVER: NEW_ADVER.data,
+          ROAS: ROAS.data,
+          STOP_ADVER: STOP_ADVER.data,
+        },
       });
     });
-  }, []);
+  };
+
+  componentDidMount() {
+    getCustom({
+      layoutName: 'layout',
+    }).then(response => {
+      const { data } = response.data;
+      const result = new Map();
+      // Map 으로 변경 및 데이터 가공
+      // 테이블 나오는 순서대로 이슈설정 리스트에 넣어줌
+      for (let i = 0; i < tableOrder.length; i++) {
+        const curData = tableOrder[i];
+        const { key } = curData;
+        result.set(key, {
+          ...curData,
+          id: curData.key,
+          displayFlag: data[key].display,
+        });
+      }
+
+      this.setState({
+        ...this.state,
+        layoutList: result,
+      });
+      this.getData();
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    const { params: prevParams } = prevState;
+    const { params, loading } = this.state;
+
+    if (JSON.stringify(prevParams) !== JSON.stringify(params)) {
+      initialization = false;
+      if (!loading) {
+        this.getData();
+      }
+    }
+  }
 
   /**
    * 필터 초기화
    */
-  const handleOnReset = () => {
+  handleOnReset = () => {
     initialization = true;
-    setParams(initParam);
-    setSelectedManagerIndex(0);
+
+    this.setState({
+      ...this.state,
+      params: { ...initParam },
+      selectedManagerIndex: 0,
+    });
   };
 
   /**
@@ -369,79 +537,158 @@ const IssueStatistics = () => {
    * @param {string} name
    * @param {*} value
    */
-  const handleFilterChange = (name, index, value) => {
-    setSelectedManagerIndex(index);
-    setParams({
-      ...params,
-      contact: value,
+  handleFilterChange = (name, index, value) => {
+    this.setState({
+      ...this.state,
+      params: {
+        ...this.state.params,
+        contact: value,
+      },
+      selectedManagerIndex: index,
     });
   };
 
-  const getParam = newParams => {
-    setGetInitParam(true);
-    setParams({
-      ...params,
-      ...newParams,
+  getParam = newParams => {
+    const { getInitParam } = this.state;
+    initialization = false;
+    if (getInitParam === false) {
+      initParam = {
+        ...initParam,
+        ...newParams,
+      };
+    }
+
+    this.setState({
+      ...this.state,
+      getInitParam: true,
+      params: {
+        ...this.state.params,
+        ...newParams,
+      },
     });
   };
 
-  return (
-    <>
-      <FilterWrap handleOnReset={handleOnReset}>
-        <ManagerFilter
-          label={t('영업 담당')}
-          value={selectedManagerIndex}
-          handleOnchange={handleFilterChange}
-        />
-        <StatisticsCommonFilter
-          initialization={initialization}
-          getParam={getParam}
-          noneDate={true}
-          noneExternalFilter={true}
-        />
-      </FilterWrap>
-      {getInitParam && (
-        <EnhancedTableWrap>
-          <div className={classes.tableRoot}>
-            {/**
-             * 디스플레이 여부로 테이블 리턴
-             */
-            Object.keys(layoutList).length !== 0 &&
-              (() => {
-                const result = [];
+  handleSaveTableSet = customList => {
+    const param = [];
+    for (let item of customList.values()) {
+      const { id, displayFlag } = item;
 
-                for (let i = 0; i < tableOrder.length; i++) {
-                  const { key, label } = tableOrder[i];
-                  const curData = layoutList[key];
-                  const tableInfo = tableInfoJson[key];
+      if (displayFlag) {
+        param.push(id);
+      }
+    }
 
-                  if (curData.display) {
-                    result.push(
-                      <div
-                        key={key}
-                        className={`${classes.tableWrap} mb-issue-table`}
-                      >
-                        <h3 className={classes.tableTitle}>{label}</h3>
-                        <BasicTable
-                          order={tableInfo.order}
-                          orderBy={tableInfo.orderBy}
-                          list={list[key]}
-                          headCells={makeHeadData(tableInfo.headList)}
-                          loading={loading}
-                          className={`${classes.issueTable} ${key}`}
-                          customized={customized}
-                        />
-                      </div>
-                    );
+    setCustom({ values: param.join(','), type: 'layout' })
+      .then(response => {})
+      .catch(error => console.log(error));
+
+    this.setState({
+      ...this.state,
+      layoutList: customList,
+    });
+  };
+
+  handleSearch = value => {
+    this.setState({
+      ...this.state,
+      params: {
+        ...this.state.params,
+        keyword: value,
+      },
+    });
+  };
+
+  render() {
+    const {
+      handleOnReset,
+      handleFilterChange,
+      getParam,
+      handleSaveTableSet,
+      handleSearch,
+    } = this;
+    const { t, classes } = this.props;
+    const {
+      loading,
+      layoutList,
+      list,
+      getInitParam,
+      selectedManagerIndex,
+    } = this.state;
+
+    return (
+      <>
+        {/* <div style={{ display: 'none' }}>
+          <Statistics url="/report/daily/par" />
+        </div> */}
+        <FilterWrap handleOnReset={handleOnReset}>
+          <ManagerFilter
+            label={t('영업 담당')}
+            value={selectedManagerIndex}
+            handleOnchange={handleFilterChange}
+          />
+          <StatisticsCommonFilter
+            initialization={initialization}
+            getParam={getParam}
+            noneDate={true}
+            noneExternalFilter={true}
+          />
+        </FilterWrap>
+        {getInitParam && (
+          <EnhancedTableWrap
+            columnSetButton={
+              <SetUpList
+                list={layoutList}
+                handleSaveCustomSet={handleSaveTableSet}
+                title={t('이슈 설정')}
+                popoverTitle={t('나만의 기본 이슈를 설정해보세요.')}
+                popoverNotice={t('설정 이후 선택한 이슈만 노출됩니다.')}
+                saveButtonTitle={t('내 이슈로 설정')}
+                icon={<img alt={t('이슈 설정')} src={issueIcon} />}
+              />
+            }
+            handleSearch={handleSearch}
+          >
+            <div className={classes.tableRoot}>
+              {/**
+               * 디스플레이 여부로 테이블 리턴
+               */
+              layoutList.size !== 0 &&
+                (() => {
+                  const result = [];
+
+                  for (let i = 0; i < tableOrder.length; i++) {
+                    const { key, label } = tableOrder[i];
+                    const curData = layoutList.get(key);
+                    const tableInfo = tableInfoJson[key];
+
+                    if (curData.displayFlag) {
+                      result.push(
+                        <div
+                          key={key}
+                          className={`${classes.tableWrap} mb-issue-table`}
+                        >
+                          <h3 className={classes.tableTitle}>{label}</h3>
+                          <BasicTable
+                            order={tableInfo.order}
+                            orderBy={tableInfo.orderBy}
+                            list={list[key]}
+                            headCells={makeHeadData(tableInfo.headList)}
+                            loading={loading}
+                            className={`${classes.issueTable} ${key}`}
+                            customized={customized}
+                          />
+                        </div>
+                      );
+                    }
                   }
-                }
-                return result;
-              })()}
-          </div>
-        </EnhancedTableWrap>
-      )}
-    </>
-  );
-};
+                  return result;
+                })()}
+            </div>
+          </EnhancedTableWrap>
+        )}
+      </>
+    );
+  }
+}
 
-export default IssueStatistics;
+export default withTranslation()(withStyles(style)(IssueStatistics));

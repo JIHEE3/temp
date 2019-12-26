@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { withRouter } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 import { Button } from '@material-ui/core';
@@ -47,10 +46,10 @@ const ModalBasic = ({
   comfirmBtnOpen,
   cancelOnClick,
   comfirmOnClick,
+  cancelBtnTitle,
   comfirmBtnTitle,
 }) => {
   const classes = useStyles();
-  const { t } = useTranslation();
 
   return (
     <>
@@ -62,7 +61,7 @@ const ModalBasic = ({
             className={`${classes.modalFooterButton} ${classes.cancelBtn}`}
             onClick={cancelOnClick}
           >
-            {t('취소')}
+            {cancelBtnTitle}
           </Button>
         )}
         {comfirmBtnOpen && (

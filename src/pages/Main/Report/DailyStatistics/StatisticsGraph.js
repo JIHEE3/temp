@@ -1,6 +1,8 @@
 import React from 'react';
 import i18next from 'i18next';
+import queryString from 'query-string';
 import { withTranslation } from 'react-i18next';
+import { withRouter } from 'react-router';
 import { withTheme } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/styles';
 import { connect } from 'react-redux';
@@ -193,7 +195,9 @@ class StatisticsGraph extends React.Component {
   }
 
   getData = () => {
-    const { params, locale, t } = this.props;
+    const { params, locale, t, location } = this.props;
+    const { uri } = queryString.parse(location.search);
+
     const { sDate, eDate } = params;
     const format = getFormat(locale);
     this.setState({
@@ -207,7 +211,7 @@ class StatisticsGraph extends React.Component {
         }),
       }),
     });
-    dailyParGraph(params)
+    dailyParGraph({ ...params, uri })
       .then(response => {
         const { data } = response.data;
 
@@ -399,11 +403,13 @@ class StatisticsGraph extends React.Component {
   }
 }
 
-export default withTranslation()(
-  connect(
-    ({ locale }) => ({
-      locale: locale.locale,
-    }),
-    null
-  )(withStyles(styles)(withTheme(StatisticsGraph)))
+export default withRouter(
+  withTranslation()(
+    connect(
+      ({ locale }) => ({
+        locale: locale.locale,
+      }),
+      null
+    )(withStyles(styles)(withTheme(StatisticsGraph)))
+  )
 );

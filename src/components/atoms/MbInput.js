@@ -1,5 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import clsx from 'clsx';
 import NumberFormat from 'react-number-format';
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
@@ -12,6 +13,11 @@ const useStyles = makeStyles(theme => ({
     '& fieldset': {
       borderColor: theme.palette.box.secondaryBorderColor,
     },
+
+    '&.error fieldset': {
+      borderColor: theme.palette.common.red,
+    },
+
     '&:hover fieldset': {
       borderColor: `${theme.palette.primary.main} !important`,
     },
@@ -48,7 +54,12 @@ NumberFormatCustom.propTypes = {
   onChange: PropTypes.func.isRequired,
 };
 
-export default function MbInput({ numberFormat, ...rest }) {
+export default function MbInput({
+  numberFormat,
+  error,
+  className = '',
+  ...rest
+}) {
   const classes = useStyles();
   const InputProps = {
     ...rest.InputProps,
@@ -64,6 +75,7 @@ export default function MbInput({ numberFormat, ...rest }) {
       classes={{
         root: classes.root,
       }}
+      className={clsx(className, { error })}
       variant="outlined"
       InputProps={InputProps}
     />

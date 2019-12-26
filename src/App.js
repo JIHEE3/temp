@@ -100,6 +100,12 @@ const theme = createMuiTheme({
       black: '#4d4f5c',
       red: '#dc5858',
       blue: '#4781cc',
+      gray: '#b3bac8',
+      gray2: '#b7b8bd',
+      gray3: '#9b9ca4',
+      gray4: '#f6f6f9',
+      gray5: '#b8bfc1',
+      selectedGreen: '#eff9e4',
     },
     primary: {
       50: '#e8f5e9',
@@ -139,6 +145,7 @@ const theme = createMuiTheme({
       headerTextColor: '#9b9ca4',
     },
     secondary: brown,
+    secondaryColor: '#4ed1bd',
     graph: {
       color: {
         0: '#2fa6fa',
@@ -187,6 +194,9 @@ const theme = createMuiTheme({
     },
     text: {
       // primary: '#33691e'
+    },
+    icon: {
+      default: '#8d9ba2',
     },
   },
 });
@@ -312,10 +322,7 @@ function App(props) {
             {/* 반송률 통계 */}
             <Route path="/report/bounce" component={ReturnStatistics} />
             {/* 지역타겟팅 통계 */}
-            <Route
-              path="/report/locatetargeting"
-              component={LocalTargetingStatistics}
-            />
+            <Route path="/report/local" component={LocalTargetingStatistics} />
             {/* 어뷰징 관리 */}
             <Route path="/report/abusing" component={AbusingList} />
             {/* 키워드 센터 */}

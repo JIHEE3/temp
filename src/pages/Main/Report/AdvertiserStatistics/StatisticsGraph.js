@@ -350,6 +350,7 @@ class StatisticsGraph extends React.Component {
                 innerRadius={50}
                 outerRadius={70}
                 dataKey="value"
+                legend
               />
             </div>
           </>

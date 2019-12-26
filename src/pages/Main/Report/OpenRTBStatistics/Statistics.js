@@ -21,9 +21,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 let initialization = false;
+let initParam = {};
 const Statistics = ({ displayFilterList }) => {
   const classes = useStyles();
-  const initParam = {};
   // 공통 필터에서 초기값 받아왔는지 확인
   const [getInitParam, setGetInitParam] = useState(false);
   const [params, setParams] = useState(initParam);
@@ -62,6 +62,12 @@ const Statistics = ({ displayFilterList }) => {
   };
 
   const getParam = newParams => {
+    if (getInitParam === false) {
+      initParam = {
+        ...initParam,
+        ...newParams,
+      };
+    }
     setGetInitParam(true);
     setParams({
       ...params,

@@ -101,6 +101,7 @@
       "term": "{{startDate}} to {{endDate}}",
       "까지의 기간 중, 광고주별 합계 15만원 이상 지출된 내 광고주 데이터 그래프입니다.": "This is a graph of your advertiser's data, totaling at least $ 150 per advertiser, for the period from {{date}}.",
       "까지의 통계 그래프입니다.": "Statistics graph from {{date}}",
+      "까지의 기간 중, 각 타겟팅별 합계 그래프입니다.": "Sum graph for each targeting over the period {{date}}",
       "정보관리": "Information management",
       "사용자로 로그인": "Log in as user",
       "충전 관리": "Charge management",
@@ -154,7 +155,27 @@
       "일별": "Daily",
       "월별": "Monthly",
       "일별/월별 예산 그래프": "Daily / Monthly Budget Graph",
-      "영업 담당": "Sales Manager"
+      "영업 담당": "Sales Manager",
+      "이슈 설정": "Issue Setting",
+      "나만의 기본 컬럼을 설정해보세요.": "Try setting your own default column.",
+      "나만의 기본 이슈를 설정해보세요.": "Set your own default issue.",
+      "설정 이후 선택한 이슈만 노출됩니다.": "Only selected artifacts will be exposed after setup.",
+      "설정 이후 선택한 컬럼만 노출됩니다.": "Only the selected columns are exposed after setup.",
+      "내 이슈로 설정": "Set as my issue",
+      "내 컬럼으로 설정": "Set to my column",
+      "광고주로 로그인": "Log in as an advertiser",
+      "광고주 통계": "Advertiser stats",
+      "사이트 이동": "Go site",
+      "최소금액": "Minimum amount",
+      "최고금액": "Maximum amount",
+      "이상": "More than {{value}}",
+      "카테고리 검색": "Category Search",
+      "취소": "Cancel",
+      "적용": "Apply",
+      "상점": "Shop",
+      "상점보기": "Shop view",
+      "전체보기": "View all",
+      "상점 등록": "Store registration"
     }
   }
 }

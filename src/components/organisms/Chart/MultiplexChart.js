@@ -71,7 +71,7 @@ const makeYAxis = ({ axisData, orientation, keyLabel, maxData = {} }) => {
             domain={
               maxData[key] !== undefined
                 ? ['auto', isPercent ? maxData[key] * 100 : maxData[key]]
-                : null
+                : [0, 'auto']
             }
           />
         );
@@ -99,13 +99,17 @@ const makeYAxis = ({ axisData, orientation, keyLabel, maxData = {} }) => {
         domain={
           maxData[key] !== undefined
             ? ['auto', isPercent ? maxData[key] * 100 : maxData[key]]
-            : null
+            : [0, 'auto']
         }
       />
     );
   }
 
   return result;
+};
+
+const handleHiddenData = e => {
+  console.log(e.dataKey);
 };
 
 /**
@@ -229,6 +233,7 @@ export default function MultiplexChart({
             {legend &&
               (typeof legendData === 'undefined' ? (
                 <Legend
+                  onClick={handleHiddenData}
                   verticalAlign="top"
                   // align="right"
                   height={legendHeight}

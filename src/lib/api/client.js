@@ -28,6 +28,13 @@ const client = axios.create();
 client.interceptors.response.use(
   function(response) {
     // Do something with response data
+    const { data } = response;
+    if (typeof data.success !== 'undefined') {
+      const { success, message } = data;
+      if (success === false) {
+        throw new Error(message);
+      }
+    }
     return response;
   },
   function({ response }) {

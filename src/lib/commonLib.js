@@ -1,17 +1,16 @@
 import numeral from 'numeral';
 import moment from 'moment';
 
-export const onlyNumber = /[^0-9]/g;
+export const onlyNumber = /^[0-9\b]+$/;
 
-export function makeHeadData(data, addColumnList = new Map()) {
+export function makeHeadData(data = [], addColumnList = new Map()) {
   const headCells = new Map();
-  for (let i = 0; i < data.length; i++) {
-    const head = data[i];
-    const { id, label, orderFlag, type, format, displayFlag } = head;
-    const addColumn = addColumnList.get(i);
-    if (typeof addColumn !== 'undefined') {
-      const { id, label, align = 'center', makeRowFunc } = addColumn;
-      headCells.set(id, {
+  // 화면에서 추가하는 컬럼 json값 변환해서 반환해주는
+  const returnAddColumJson = columnData => {
+    const { id, label, align = 'center', makeRowFunc } = columnData;
+    return {
+      id,
+      data: {
         id,
         label,
         align,
@@ -19,7 +18,17 @@ export function makeHeadData(data, addColumnList = new Map()) {
         className: `mb-${under2camel(id)}`,
         isAddColumn: true,
         makeRowFunc,
-      });
+      },
+    };
+  };
+
+  for (let i = 0; i < data.length; i++) {
+    const head = data[i];
+    const { id, label, orderFlag, type, format, displayFlag } = head;
+    const addColumn = addColumnList.get(i);
+    if (typeof addColumn !== 'undefined') {
+      const { id, data } = returnAddColumJson(addColumn);
+      headCells.set(id, data);
     }
 
     const align =
@@ -40,6 +49,21 @@ export function makeHeadData(data, addColumnList = new Map()) {
       className: `mb-${under2camel(id)}`,
     });
   }
+
+  // 화면에서 테이블 뒷컬럼에 추가해야 하는경우
+  if (typeof addColumnList.get(-1) !== 'undefined') {
+    for (let i = -1; i < addColumnList.size; i--) {
+      const addColumn = addColumnList.get(i);
+
+      if (typeof addColumn !== 'undefined') {
+        const { id, data } = returnAddColumJson(addColumn);
+        headCells.set(id, data);
+      } else {
+        // 더이상 없으므로 끝냄
+        break;
+      }
+    }
+  }
   return headCells;
 }
 
@@ -49,10 +73,10 @@ export function makeHeadData(data, addColumnList = new Map()) {
  * @param {Map} addColumnList 화면에서 추가할 column list
  * @return {Promise}
  */
-export function fetchHeader(func, addColumnList) {
+export function fetchHeader(func, addColumnList, uri) {
   // get table headers
   return new Promise((resolve, reject) => {
-    func()
+    func({ uri })
       .then(response => {
         const { data } = response.data;
         resolve(makeHeadData(data, addColumnList));
@@ -269,4 +293,8 @@ export const makeOptionList = (data, optionLabelKey, optionValueKey) => {
   result.unshift(defaultOption);
 
   return result;
+};
+
+export const weeksConversion = e => {
+  return e.toString().replace(/\B(?=(\d{1})+(?!\d))/g, ',');
 };

@@ -56,6 +56,7 @@ const EnhancedTableToolbar = props => {
     screenMode,
     handleExcelDonload,
     handleScreenMode,
+    handleSearch,
   } = props;
 
   return (
@@ -68,7 +69,10 @@ const EnhancedTableToolbar = props => {
       {columnSetButton}
       {/* 검색 */}
       <div className={classes.searchWrap}>
-        <SearchInput placeholder={t('검색어를 입력하세요.')} />
+        <SearchInput
+          placeholder={t('검색어를 입력하세요.')}
+          handleSearch={handleSearch}
+        />
       </div>
       <div className={classes.title}>
         {numSelected > 0 ? (
@@ -134,13 +138,13 @@ const useStyles = theme => ({
     borderTop: theme.palette.box.border,
   },
   columnSet: props => {
-    const { headCells } = props;
+    const { headcells } = props;
     const result = {};
 
-    if (typeof headCells === 'undefined') {
+    if (typeof headcells === 'undefined') {
       return null;
     }
-    for (let headCell of headCells.values()) {
+    for (let headCell of headcells.values()) {
       const { id, className, displayFlag } = headCell;
       if (id === 'SEQ') {
         continue;
@@ -173,6 +177,7 @@ export default withStyles(useStyles)(
         handleExcelDonload,
         handleScreenMode,
         children,
+        handleSearch,
         ...rest
       } = this.props;
 
@@ -194,6 +199,7 @@ export default withStyles(useStyles)(
             screenMode={screenMode}
             handleExcelDonload={handleExcelDonload}
             handleScreenMode={handleScreenMode}
+            handleSearch={handleSearch}
           />
           {children}
         </div>

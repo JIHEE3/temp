@@ -1,15 +1,18 @@
 import React from 'react';
 
 import 'react-dates/initialize';
-import 'react-dates/lib/css/_datepicker.css';
 
 import { useTranslation } from 'react-i18next';
 import { makeStyles } from '@material-ui/styles';
-
-import OutlinedInput from '@material-ui/core/OutlinedInput';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import ButtonGroup from '@material-ui/core/ButtonGroup';
 import InputAdornment from '@material-ui/core/InputAdornment';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import OutlinedInput from '@material-ui/core/OutlinedInput';
+import ModalButton from 'components/atoms/ModalButton';
+import Select from '@material-ui/core/Select';
+
+import DatePicker from 'components/organisms/DatePicker/SingleDate';
 
 const bankDepositStyle = makeStyles(theme => ({
   form: {
@@ -64,6 +67,7 @@ const bankDepositStyle = makeStyles(theme => ({
     margin: 0,
     borderColor: '#e8e9ec',
     '& input': {
+      padding: '8px 10px 7px',
       fontSize: 15,
     },
     '&.smallInput': {
@@ -91,50 +95,28 @@ const bankDepositStyle = makeStyles(theme => ({
       border: 0,
     },
   },
-  memo: {
-    width: '100%',
+  errorMessage: {
+    marginLeft: 0,
+    color: '#f00',
   },
 }));
 
-const Bonus = () => {
+const BankDeposit = props => {
+  // const { userId, date, price, priceError, name, changeValue } = props;
+  const { userId, price, priceError, name, changeValue } = props;
   const classes = bankDepositStyle();
   const { t } = useTranslation();
   return (
     <>
-      <form className={classes.form} autoComplete="off" noValidate>
+      <form className={classes.form} noValidate>
         <table>
           <tbody>
             <tr>
               <th>{t('광고주ID')}</th>
-              <td>ID AREA</td>
+              <td>{userId}</td>
             </tr>
             <tr>
-              <th>{t('충전 금액')}</th>
-              <td>
-                <div>
-                  <FormControl variant="outlined">
-                    <OutlinedInput
-                      margin="dense"
-                      className={`smallInput ${classes.textField}`}
-                      classes={{
-                        notchedOutline: classes.border,
-                      }}
-                      endAdornment={
-                        <InputAdornment position="end">
-                          {t('원')}
-                        </InputAdornment>
-                      }
-                      inputProps={{
-                        'aria-label': 'weight',
-                      }}
-                      labelWidth={0}
-                    />
-                  </FormControl>
-                </div>
-              </td>
-            </tr>
-            <tr>
-              <th>{t('충전 시간')}</th>
+              <th>{t('사유')}</th>
               <td>
                 <FormControl
                   variant="outlined"
@@ -144,47 +126,138 @@ const Bonus = () => {
                 >
                   <Select
                     native
+                    onChange={changeValue('rsvTime')}
+                    name="rsvTime"
                     classes={{
                       select: classes.selectSize,
                       root: classes.border,
                     }}
                   >
-                    <option value="" />
-                    <option value={10}>
-                      1시간 1시간 1시간 1시간 1시간 1시간 1시간 1시간
-                    </option>
-                    <option value={20}>2시간 2시간 2시간 2시간</option>
-                    <option value={30}>3시간 3시간 3시간 3시간</option>
+                    <option value="">시간을 선택해주세요.</option>
+                    <option value={'0'}>00시</option>
+                    <option value={'01'}>01시</option>
+                    <option value={'02'}>02시</option>
+                    <option value={'03'}>03시</option>
+                    <option value={'04'}>04시</option>
+                    <option value={'05'}>05시</option>
+                    <option value={'06'}>06시</option>
+                    <option value={'07'}>07시</option>
+                    <option value={'08'}>08시</option>
+                    <option value={'09'}>09시</option>
+                    <option value={'10'}>10시</option>
+                    <option value={'11'}>11시</option>
+                    <option value={'12'}>12시</option>
+                    <option value={'13'}>13시</option>
+                    <option value={'14'}>14시</option>
+                    <option value={'15'}>15시</option>
+                    <option value={'16'}>16시</option>
+                    <option value={'17'}>17시</option>
+                    <option value={'18'}>18시</option>
+                    <option value={'19'}>19시</option>
+                    <option value={'20'}>20시</option>
+                    <option value={'21'}>21시</option>
+                    <option value={'22'}>22시</option>
+                    <option value={'23'}>23시</option>
                   </Select>
                 </FormControl>
               </td>
             </tr>
             <tr>
-              <th>{t('입금자명')}</th>
+              <th>{t('충전 일자')}</th>
               <td>
-                <OutlinedInput
-                  variant="outlined"
-                  margin="dense"
-                  className={classes.textField}
-                  classes={{
-                    notchedOutline: classes.border,
-                  }}
-                />
+                <div>
+                  <DatePicker changeValue={changeValue} />
+                </div>
+                <div></div>
+              </td>
+            </tr>
+            <tr className={classes.verticalTop}>
+              <th>{t('충전 금액')}</th>
+              <td>
+                <div>
+                  <FormControl variant="outlined">
+                    <OutlinedInput
+                      name="price"
+                      value={price}
+                      onChange={changeValue('price')}
+                      className={`smallInput ${classes.textField}`}
+                      classes={{
+                        notchedOutline: classes.border,
+                      }}
+                      error={priceError.error}
+                      endAdornment={
+                        <InputAdornment position="end">
+                          {t('원')}
+                        </InputAdornment>
+                      }
+                    />
+                    {priceError.error === true ? (
+                      <FormHelperText className={classes.errorMessage}>
+                        {priceError.message}
+                      </FormHelperText>
+                    ) : (
+                      <></>
+                    )}
+                  </FormControl>
+                </div>
+                <div>
+                  <ButtonGroup>
+                    <ModalButton
+                      buttonText={'33만원'}
+                      value="330000"
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    >
+                      330000
+                    </ModalButton>
+                    <ModalButton
+                      buttonText={'55만원'}
+                      value="550000"
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    />
+                    <ModalButton
+                      buttonText={'110만원'}
+                      value="1100000"
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    />
+                    <ModalButton
+                      buttonText={'165만원'}
+                      value="1650000"
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    />
+                    <ModalButton
+                      buttonText={'220만원'}
+                      value="2200000"
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    />
+                    <ModalButton
+                      buttonText={'초기화'}
+                      value=""
+                      name="price"
+                      buttonClickEvent={changeValue('price')}
+                    />
+                  </ButtonGroup>
+                </div>
               </td>
             </tr>
             <tr>
-              <th>{t('메모')}</th>
+              <th>{t('입금자명')}</th>
               <td>
-                <OutlinedInput
-                  variant="outlined"
-                  margin="dense"
-                  multiline
-                  rows="4"
-                  className={`${classes.textField} ${classes.memo}`}
-                  classes={{
-                    notchedOutline: classes.border,
-                  }}
-                />
+                <FormControl variant="outlined">
+                  <OutlinedInput
+                    name="name"
+                    defaultValue={name}
+                    onChange={changeValue('name')}
+                    className={`smallInput ${classes.textField}`}
+                    classes={{
+                      notchedOutline: classes.border,
+                    }}
+                  />
+                </FormControl>
               </td>
             </tr>
           </tbody>
@@ -194,4 +267,5 @@ const Bonus = () => {
   );
 };
 
-export default Bonus;
+export default BankDeposit;
+// export default ;

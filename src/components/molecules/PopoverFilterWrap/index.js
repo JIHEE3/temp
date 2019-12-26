@@ -12,11 +12,14 @@ export default class PopoverFilterWrap extends React.Component {
     super(props);
     this.anchorRef = React.createRef();
 
-    const { createOnOpen = false } = props;
+    const { createOnOpen = false, getOnClose = f => f } = props;
     this.state = {
       createOnOpen,
       open: false,
     };
+
+    // 필터창 닫을 함수 리턴
+    getOnClose(this.handleToggle);
   }
 
   handleToggle = () => {

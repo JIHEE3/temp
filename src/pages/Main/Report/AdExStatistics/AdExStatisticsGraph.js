@@ -167,7 +167,6 @@ class StatisticsGraph extends React.Component {
     adexDayGraph(params)
       .then(response => {
         const { data } = response.data;
-
         this.setState({
           ...this.state,
           primitiveData: data,
@@ -273,7 +272,7 @@ class StatisticsGraph extends React.Component {
         customize,
         primitiveData,
       });
-
+      console.log(keyLabel);
       const result = (
         <MultiplexChart
           width="100%"
