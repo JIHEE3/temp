@@ -239,6 +239,7 @@ class StatisticsGraph extends React.Component {
             </div>
             <div className={classes.content}>
               <MultiplexChart
+                key={t('쇼핑/비쇼핑 기준 비교')}
                 width={364}
                 height={200}
                 title={t('쇼핑/비쇼핑 기준 비교')}
@@ -281,6 +282,7 @@ class StatisticsGraph extends React.Component {
                 legend
               />
               <MultiplexChart
+                key={t('지출 금액별 광고주수')}
                 width={364}
                 height={200}
                 title={t('지출 금액별 광고주수')}

@@ -7,6 +7,9 @@ import MbTabs from 'components/organisms/MbTabs';
 import { displayFilterList } from 'constants/resources/commonCustomize';
 
 import Statistics from './Statistics';
+import TargetStatistics from './TargetStatistics';
+import MediaStatistics from './MediaStatistics';
+import TimeStatistics from './TimeStatistics';
 
 const OpenRTBStatistics = () => {
   let { path } = useRouteMatch();
@@ -39,6 +42,28 @@ const OpenRTBStatistics = () => {
               </>
             ),
           },
+            '/report/openrtb/target': {
+                tabComponent: (
+                    <>
+                        <TargetStatistics displayFilterList={displayFilterList.openRTB} />
+                    </>
+                ),
+            },
+          '/report/openrtb/time': {
+            tabComponent: (
+                <>
+                  <TimeStatistics displayFilterList={displayFilterList.openRTB} />
+                </>
+            ),
+          },
+          '/report/openrtb/media': {
+            tabComponent: (
+                <>
+                  <MediaStatistics displayFilterList={displayFilterList.openRTB} />
+                </>
+            ),
+          },
+            '/mobsense/admin/rtb/kakao_banner.php': {},
         }}
       ></MbTabs>
     </MainTemplate>

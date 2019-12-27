@@ -213,6 +213,7 @@ class StatisticsGraph extends React.Component {
           title={title}
           isPercent={isPercent}
           maxData={max}
+          key={title}
         />
       );
       const { graphComponent } = this.state;

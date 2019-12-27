@@ -10,7 +10,7 @@ import { cookieParamGraph } from 'lib/api/datacenter';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/pro-light-svg-icons';
 
-import { getDate, getFormat, twoDigits, makeGraph } from 'lib/commonLib';
+import { getFormat, twoDigits, makeGraph } from 'lib/commonLib';
 import MbTooltip from 'components/atoms/MbTooltip';
 import MbDataState from 'components/atoms/MbDataState';
 import SwitchingArea from 'components/organisms/SwitchingArea';
@@ -104,11 +104,10 @@ class StatisticsGraph extends React.Component {
   }
 
   getData = () => {
-    const { locale, t } = this.props;
-    const sDate = moment().add(-1, 'month');
-    const eDate = moment().add(-1, 'day');
-
+    const { locale, t, params } = this.props;
     const format = getFormat(locale);
+    let sDate, eDate, pltfomTpCode;
+
     this.setState({
       ...this.state,
       loading: true,
@@ -120,7 +119,22 @@ class StatisticsGraph extends React.Component {
         }),
       }),
     });
-    cookieParamGraph({ sDate: getDate(sDate), eDate: getDate(eDate) })
+
+    if (typeof params === 'undefined') {
+      sDate = moment()
+        .add(-1, 'day')
+        .add(-1, 'month')
+        .format('YYYYMMDD');
+      eDate = moment()
+        .add(-1, 'day')
+        .format('YYYYMMDD');
+    } else {
+      sDate = params.sDate;
+      eDate = params.eDate;
+      pltfomTpCode = params.pltfomTpCode;
+    }
+
+    cookieParamGraph({ sDate: sDate, eDate: eDate, pltfomTpCode: pltfomTpCode })
       .then(response => {
         const { data } = response.data;
 
@@ -254,6 +268,7 @@ class StatisticsGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
+          key={title}
         />
       );
 

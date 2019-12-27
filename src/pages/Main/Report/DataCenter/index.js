@@ -4,10 +4,19 @@ import { useRouteMatch } from 'react-router-dom';
 import MainTemplate from 'pages/templates/MainTemplate';
 import MbTabs from 'components/organisms/MbTabs';
 
+//데이터센터현황
 import CookieParamGraph from './CookieParamGraph';
 import AudienceUserGraph from './AudienceUserGraph';
 import AdidStatusGraph from './AdidStatusGraph';
 import AudienceNewGraph from './AudienceNewGraph';
+
+//광고쿠키통계
+import CookieStatistics from './CookieStatistics';
+
+//앱모수타겟팅통계
+import AppTargetingDailyStatistics from './AppTargetingDailyStatistics';
+import AppTargetingMediaStatistics from './AppTargetingMediaStatistics';
+import AppTargetingAdverStatistics from './AppTargetingAdverStatistics';
 
 const DataCenter = () => {
   let { path } = useRouteMatch();
@@ -64,6 +73,34 @@ const DataCenter = () => {
                     <AudienceNewGraph />
                   </div>
                 </div>
+              </>
+            ),
+          },
+          '/report/datacenter/cookie': {
+            tabComponent: (
+              <>
+                <CookieStatistics />
+              </>
+            ),
+          },
+          '/report/datacenter/appTargetingDaily': {
+            tabComponent: (
+              <>
+                <AppTargetingDailyStatistics />
+              </>
+            ),
+          },
+          '/report/datacenter/appTargetingMedia': {
+            tabComponent: (
+              <>
+                <AppTargetingMediaStatistics />
+              </>
+            ),
+          },
+          '/report/datacenter/appTargetingAdver': {
+            tabComponent: (
+              <>
+                <AppTargetingAdverStatistics />
               </>
             ),
           },

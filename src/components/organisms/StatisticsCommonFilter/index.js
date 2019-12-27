@@ -176,6 +176,7 @@ class StatisticsCommonFilter extends React.Component {
       t,
       initialization,
       nonePltfomTpCode,
+      noneDisplayFilter,
       noneDate,
       noneExternalFilter,
       displayFilterList,
@@ -220,14 +221,16 @@ class StatisticsCommonFilter extends React.Component {
             }
           />
         )}
-        <DisplayFilter
-          id="mb-daily-statistics-display-popper"
-          handleOnClickFilter={handleOnClickDisplayFilter}
-          advrtsPrdtCode={advrtsPrdtCode}
-          displayFilterList={displayFilterList}
-          params={params}
-          advrtsTpCodeJson={advrtsTpCodeJson}
-        />
+        {!noneDisplayFilter && (
+          <DisplayFilter
+            id="mb-daily-statistics-display-popper"
+            handleOnClickFilter={handleOnClickDisplayFilter}
+            advrtsPrdtCode={advrtsPrdtCode}
+            displayFilterList={displayFilterList}
+            params={params}
+            advrtsTpCodeJson={advrtsTpCodeJson}
+          />
+        )}
         {!noneExternalFilter && (
           <ExternalFilter
             id="mb-daily-statistics-external-popper"

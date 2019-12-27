@@ -212,6 +212,7 @@ class BudgetGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
+          key={title}
         />
       );
 

@@ -197,6 +197,8 @@ class MbTableRow extends React.Component {
         isAddColumn = false,
         makeRowFunc,
       } = headCell;
+
+      // console.log(headCell);
       const isChild = row.isChild;
       let content = row[headId];
       let title = null;
@@ -377,7 +379,7 @@ export default withStyles(styles)(
         <>
           {hasTotal && !error && (
             <TableHead>
-              {totalList === null ? (
+              {list === null || list.length === 0 || totalList === null ? (
                 <TableRow tabIndex={-1}>
                   <TableCell
                     className={classes.totalCell}

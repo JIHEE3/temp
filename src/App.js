@@ -287,11 +287,12 @@ function App(props) {
             {/* 새창 링크 설정 */}
             <Route path="/product/setlink" component={NewPageSeting} />
             {/* ***** 통계 보고서 ***** */}
+            {/* 일자별 통계 */}
             <Route path="/report/daily" component={DailyStatistics} />
             {/* 매체 통계 */}
             <Route path="/report/media" component={MediaStatistics} />
             {/* Open RTB 통계 */}
-            <Route path="/report/openrtb/day" component={OpenRTBStatistics} />
+            <Route path="/report/openrtb" component={OpenRTBStatistics} />
             {/* 월별 통계 */}
             <Route path="/report/month" component={MonthStatistics} />
             {/* 광고주별통계 */}

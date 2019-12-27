@@ -83,18 +83,27 @@ export default function EnhancedTableHead({
       const {
         id,
         disablePadding,
-        orderFlag,
+        // orderFlag,
         label,
         className,
         align,
       } = headCell;
+      let { orderFlag } = headCell;
       if (id !== 'SEQ') {
         let content = label;
         if (typeof customized[id] !== 'undefined') {
           if (customized[id].merged === true) {
             continue;
           } else if (typeof customized[id].makeHead !== 'undefined') {
-            content = customized[id].makeHead(headCells);
+            // content = customized[id].makeHead(headCells);
+            const result = customized[id].makeHead(headCells);
+
+            if (result.content !== undefined) {
+              content = result.content;
+              orderFlag = result.orderFlag;
+            } else {
+              content = result;
+            }
           }
         }
         result.push(

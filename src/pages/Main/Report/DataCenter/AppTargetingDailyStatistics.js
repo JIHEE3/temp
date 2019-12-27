@@ -1,29 +1,38 @@
 import React, { useState, useEffect } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import TableContainer from 'components/molecules/MbTable';
-import { openrtbStatistics, openrtbStatisticsDetail } from 'lib/api/openrtb';
+import { appTargetingDailyStatistics } from 'lib/api/datacenter';
 
 import FilterWrap from 'components/atoms/FilterWrap';
 import StatisticsCommonFilter from 'components/organisms/StatisticsCommonFilter';
-import StatisticsGraph from './StatisticsGraph';
+
+import AppTargetingDailyGraph from './AppTargetingDailyGraph';
 
 const useStyles = makeStyles(theme => ({
-  root: {
-    // 테이블 th, td 커스텀 css
-    '& .mb-corpName': {
-      width: '130px',
-    },
-    '& td.mb-corpName .mb-corpName-text': {
-      color: theme.palette.secondary.main,
-      fontWeight: 600,
-    },
+  subContent: {
+    color: theme.palette.primary.contrastText,
+  },
+  subShoppingContent: {
+    float: 'right',
+    color: theme.palette.table.cell.shoppingContent,
+  },
+  icoBox: {
+    fontSize: 15,
+    float: 'left',
+    color: '#4d5059',
+    cursor: 'pointer',
+    marginRight: 10,
+  },
+  noMaxWidth: {
+    maxWidth: 'none',
   },
 }));
 
 let initialization = false;
 let initParam = {};
-const Statistics = ({ displayFilterList }) => {
+const AppTargetingDailyStatistics = () => {
   const classes = useStyles();
+
   // 공통 필터에서 초기값 받아왔는지 확인
   const [getInitParam, setGetInitParam] = useState(false);
   const [params, setParams] = useState(initParam);
@@ -34,24 +43,8 @@ const Statistics = ({ displayFilterList }) => {
     initialization = false;
   }, [params]);
 
-  const childColumnSet = {
-    STATS_DTTM: () => {
-      return null;
-    },
-    ADVER_CNT: () => {
-      return null;
-    },
-  };
-
-  /**
-   * 테이블 클릭 후 세부정보 받아올때 보낼 param setting 해주는 함수
-   * @param {json} data 테이블 로우 데이터
-   */
-  const makeSubParam = data => {
-    return {
-      statsDttm: data.STATS_DTTM,
-    };
-  };
+  // header 및 body 컬럼 커스텀
+  const customized = {};
 
   /**
    * 필터 초기화
@@ -81,25 +74,23 @@ const Statistics = ({ displayFilterList }) => {
         <StatisticsCommonFilter
           initialization={initialization}
           getParam={getParam}
-          displayFilterList={displayFilterList}
+          nonePltfomTpFilter={true}
+          noneExternalFilter={true}
         />
       </FilterWrap>
       {getInitParam && (
         <>
-          <StatisticsGraph params={{ ...params }} />
+          {<AppTargetingDailyGraph params={{ ...params }} />}
           <TableContainer
             className={classes.root}
-            dataReqPromise={openrtbStatistics}
-            dataDetailReqPromise={openrtbStatisticsDetail}
+            dataReqPromise={appTargetingDailyStatistics}
             params={{ ...params }}
             order="desc"
-            orderBy="ADVRTS_AMT"
+            orderBy="STATS_DTTM"
             dense={true}
-            hasExcel
             hasTotal
-            expandTable
-            makeSubParam={makeSubParam}
-            childColumnSet={childColumnSet}
+            customized={customized}
+            hasExcel
           />
         </>
       )}
@@ -107,4 +98,4 @@ const Statistics = ({ displayFilterList }) => {
   );
 };
 
-export default Statistics;
+export default AppTargetingDailyStatistics;

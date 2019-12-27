@@ -286,6 +286,7 @@ class StatisticsGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
+          key={title}
         />
       );
 

@@ -241,6 +241,7 @@ class StatisticsGraph extends React.Component {
                 yAxisData={yAxisData}
                 title={title}
                 isPercent={isPercent}
+                key={title}
               />
             </div>
           </>

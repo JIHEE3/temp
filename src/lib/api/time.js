@@ -9,14 +9,25 @@ export const dailyStatistics = param => client.get(`/api/report/day`, param);
  * 일자별 통계 웹 / 모바일 상세
  */
 export const dailyStatisticsDetail = param =>
-    client.get(`/api/report/day/sub`, param);
-
+  client.get(`/api/report/day/sub`, param);
 
 /**
  * 일자별 통계 - 구좌별통계 그래프
  */
+export const dailyTargetingParGraph = param =>
+  client.get(`/api/report/day/graph?uri=%2Freport%2Fdaily%2Fpar`, {
+    params: param,
+  });
+
 export const dailyParGraph = param =>
-  client.get(`/api/report/day/graph`, { params: param });
+  client.get(`/api/report/day/graph?uri=%2Freport%2Fdaily%2Fpar`, {
+    params: param,
+  });
+/**
+ * test
+ */
+export const dailyTargeting = param =>
+  client.get(`/api/report/day/targeting`, param);
 
 /**
  * 시간대별 통계 그래프

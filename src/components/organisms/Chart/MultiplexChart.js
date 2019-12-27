@@ -11,11 +11,30 @@ import {
   Tooltip,
   Legend,
 } from 'recharts';
+import clsx from 'clsx';
+import { makeStyles } from '@material-ui/core/styles';
 import { useTheme } from '@material-ui/core/styles';
 import CartWrap from './ChartWrap';
 import ChartTooltip from './ChartTooltip';
 
 import { toPercent, numberFormatter } from 'lib/commonLib';
+
+import LineIcon from 'images/common/chart/line';
+import RectIcon from 'images/common/chart/rect';
+
+const legendStyles = makeStyles(theme => ({
+  ul: {
+    listStyle: 'none',
+    textAlign: 'center',
+  },
+  li: {
+    display: 'inline-block',
+    marginRight: '10px',
+    '&.invisible': {
+      opacity: 0.5,
+    },
+  },
+}));
 
 // 임시 나중에 합쳐야함
 const renderTooltipContent = ({
@@ -108,10 +127,6 @@ const makeYAxis = ({ axisData, orientation, keyLabel, maxData = {} }) => {
   return result;
 };
 
-const handleHiddenData = e => {
-  console.log(e.dataKey);
-};
-
 /**
  * 축 id 반환
  * @param {json} param0 { axisData: 축데이터, key: dataKey }
@@ -134,6 +149,57 @@ const getYAxisId = ({ axisData, key }) => {
   }
 
   return yAxisId;
+};
+
+/**
+ * legend 컴포넌트
+ * @param {json} props
+ */
+const CustomizedLegend = props => {
+  const { payload, keyLabel = {}, handleOnCilck, visible } = props;
+  const classes = legendStyles();
+  const [legendList, setLegendList] = React.useState(
+    (() => {
+      const result = [];
+      // 처음에 legend list 셋팅해줌
+      for (let i = 0; i < payload.length; i++) {
+        const { dataKey } = payload[i];
+        result.push({
+          name:
+            typeof keyLabel[dataKey] === 'undefined'
+              ? dataKey
+              : keyLabel[dataKey],
+          ...payload[i],
+        });
+      }
+
+      return result;
+    })()
+  );
+
+  return (
+    <ul className={classes.ul}>
+      {(() => {
+        return legendList.map((entry, index) => {
+          const { value, name, type, color } = entry;
+          return (
+            <li
+              key={`item-${index}`}
+              className={clsx(classes.li, { invisible: !visible[value] })}
+              onClick={() => handleOnCilck(value)}
+            >
+              {type === 'line' ? (
+                <LineIcon fill={color} />
+              ) : (
+                <RectIcon fill={color} />
+              )}
+              {name}
+            </li>
+          );
+        });
+      })()}
+    </ul>
+  );
 };
 
 export default function MultiplexChart({
@@ -159,6 +225,21 @@ export default function MultiplexChart({
 }) {
   const theme = useTheme();
   const { graph } = theme.palette;
+  const [visible, setVisible] = React.useState(
+    (() => {
+      const result = {};
+      for (let item in dataKeys) {
+        if (dataKeys.hasOwnProperty(item)) {
+          const curChartData = dataKeys[item];
+          for (let i = 0; i < curChartData.length; i++) {
+            const curKey = curChartData[i];
+            result[curKey] = true;
+          }
+        }
+      }
+      return result;
+    })()
+  );
 
   const makeTootipContent = props => {
     return renderTooltipContent({
@@ -171,6 +252,13 @@ export default function MultiplexChart({
     });
   };
 
+  const handleHiddenData = value => {
+    setVisible({
+      ...visible,
+      [value]: !visible[value],
+    });
+  };
+
   const legendHeight = 35;
   const tickFormatter = isPercent ? toPercent : numberFormatter;
   const maxIndex = Object.keys(graph.color).length;
@@ -180,8 +268,9 @@ export default function MultiplexChart({
     typeof yAxisData !== 'undefined' &&
     Object.keys(yAxisData.right).length !== 0;
   const { bar, line } = dataKeys;
+
   return (
-    <CartWrap className={`${className}`} title={title}>
+    <CartWrap className={`${className}`} title={title} key={title}>
       <div style={{ width, height }}>
         <ResponsiveContainer>
           <ComposedChart
@@ -237,16 +326,13 @@ export default function MultiplexChart({
                   verticalAlign="top"
                   // align="right"
                   height={legendHeight}
-                  // wrapperStyle={{ marginRight: haveRightYAxis ? 50 : -10 }}
-                  formatter={(value, entry) => {
-                    return (
-                      <span>
-                        {typeof keyLabel === 'undefined'
-                          ? value
-                          : keyLabel[value]}
-                      </span>
-                    );
-                  }}
+                  content={
+                    <CustomizedLegend
+                      keyLabel={keyLabel}
+                      handleOnCilck={handleHiddenData}
+                      visible={visible}
+                    />
+                  }
                 />
               ) : (
                 <Legend
@@ -265,8 +351,9 @@ export default function MultiplexChart({
             {Boolean(bar) &&
               bar.map((key, idx) => {
                 const yAxisId = getYAxisId({ axisData: yAxisData, key });
+                let result = null;
 
-                return (
+                result = (
                   <Bar
                     yAxisId={yAxisId}
                     stackId={stackId}
@@ -291,12 +378,22 @@ export default function MultiplexChart({
                     )}
                   </Bar>
                 );
+
+                if (
+                  typeof visible[key] !== 'undefined' &&
+                  visible[key] === false
+                ) {
+                  result = null;
+                }
+
+                return result;
               })}
             {Boolean(line) &&
               line.map(key => {
                 const yAxisId = getYAxisId({ axisData: yAxisData, key });
+                let result = null;
 
-                return (
+                result = (
                   <Line
                     key={key}
                     yAxisId={yAxisId}
@@ -305,6 +402,15 @@ export default function MultiplexChart({
                     stroke={graph.color[colorIndex++ % maxIndex]}
                   />
                 );
+
+                if (
+                  typeof visible[key] !== 'undefined' &&
+                  visible[key] === false
+                ) {
+                  result = null;
+                }
+
+                return result;
               })}
           </ComposedChart>
         </ResponsiveContainer>

@@ -7,7 +7,7 @@ import { withTheme } from '@material-ui/core/styles';
 import { withStyles } from '@material-ui/styles';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import { dailyParGraph } from 'lib/api/time';
+import { dailyTargetingParGraph } from 'lib/api/time';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faInfoCircle } from '@fortawesome/pro-light-svg-icons';
 
@@ -57,7 +57,7 @@ const styles = theme => ({
 
 const graphList = [
   {
-    title: i18next.t('지출금액'),
+    title: i18next.t('소진'),
     data: { bar: ['SHOP_CTGR_ADVRTS_AMT', 'ADVRTS_AMT'], line: ['ADVER_CNT'] },
     yAxisData: {
       left: { ADVER_CNT: true },
@@ -196,7 +196,7 @@ class StatisticsGraph extends React.Component {
 
   getData = () => {
     const { params, locale, t, location } = this.props;
-    const { uri } = queryString.parse(location.search);
+    // const { uri } = queryString.parse(location.search);
 
     const { sDate, eDate } = params;
     const format = getFormat(locale);
@@ -211,9 +211,11 @@ class StatisticsGraph extends React.Component {
         }),
       }),
     });
-    dailyParGraph({ ...params, uri })
+    params.uri = '/report/daily/par';
+    dailyTargetingParGraph({ ...params, uri: '/report/daily/par' })
       .then(response => {
         const { data } = response.data;
+
         this.setState({
           ...this.state,
           primitiveData: data,
@@ -334,7 +336,6 @@ class StatisticsGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
-          key={title}
         />
       );
 
@@ -398,6 +399,7 @@ class StatisticsGraph extends React.Component {
             <div className={classes.content}>{curGraphComponent}</div>
           </>
         )}
+        <button onClick={this.getData()}>버튼버튼</button>
       </SwitchingArea>
     );
   }

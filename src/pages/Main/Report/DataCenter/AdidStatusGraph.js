@@ -76,7 +76,9 @@ class StatisticsGraph extends React.Component {
 
   getData = () => {
     const { locale, t } = this.props;
-    const sDate = moment().add(-1, 'month');
+    const sDate = moment()
+      .add(-1, 'day')
+      .add(-1, 'month');
     const eDate = moment().add(-1, 'day');
 
     const format = getFormat(locale);
@@ -225,6 +227,7 @@ class StatisticsGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
+          key={title}
         />
       );
 

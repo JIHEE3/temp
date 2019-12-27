@@ -23,3 +23,35 @@ export const adidStatusGraph = param =>
  */
 export const audienceNewGraph = param =>
   client.get(`/api/report/datacenter/aunewgraph`, { params: param });
+
+/**
+ * 데이터센터 - 광고쿠키 통계
+ */
+export const CookieStatisticsData = param =>
+  client.get(`/api/report/datacenter/cookie`, param);
+
+/**
+ * 데이터센터 - 앱모수타겟팅 일자별통계
+ */
+export const appTargetingDailyStatistics = param =>
+  client.get(`/api/report/datacenter/appTargetingDaily`, param);
+
+/**
+ * 데이터센터 - 앱모수타겟팅 일자별통계 그래프
+ */
+export const appTargetingDailyGraph = param =>
+  client.get(`/api/report/datacenter/daygraph`, {
+    params: param,
+  });
+
+/**
+ * 데이터센터 - 앱모수타겟팅 매체통계
+ */
+export const appTargetingMediaStatisticsData = param =>
+  client.get(`/api/report/datacenter/appmedia`, param);
+
+/**
+ * 데이터센터 - 앱모수타겟팅 광고주통계
+ */
+export const appTargetingAdverStatisticsData = param =>
+  client.get(`/api/report/datacenter/appadver`, param);
