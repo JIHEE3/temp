@@ -10,6 +10,7 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
+  ReferenceLine,
 } from 'recharts';
 import clsx from 'clsx';
 import { makeStyles } from '@material-ui/core/styles';
@@ -33,6 +34,7 @@ const legendStyles = makeStyles(theme => ({
     '&.invisible': {
       opacity: 0.5,
     },
+    cursor: 'pointer',
   },
 }));
 
@@ -158,7 +160,7 @@ const getYAxisId = ({ axisData, key }) => {
 const CustomizedLegend = props => {
   const { payload, keyLabel = {}, handleOnCilck, visible } = props;
   const classes = legendStyles();
-  const [legendList, setLegendList] = React.useState(
+  const [legendList /*, setLegendList*/] = React.useState(
     (() => {
       const result = [];
       // 처음에 legend list 셋팅해줌
@@ -202,6 +204,18 @@ const CustomizedLegend = props => {
   );
 };
 
+const CustomizedLabel = props => {
+  const { viewBox, label } = props;
+
+  return (
+    <text {...viewBox} textAnchor="middle">
+      <tspan x={viewBox.width} dy="18">
+        {label}
+      </tspan>
+    </text>
+  );
+};
+
 export default function MultiplexChart({
   xInterval = 0,
   xAxisTick,
@@ -222,6 +236,7 @@ export default function MultiplexChart({
   stackId,
   yAxisData,
   maxData,
+  referenceLine,
 }) {
   const theme = useTheme();
   const { graph } = theme.palette;
@@ -412,6 +427,28 @@ export default function MultiplexChart({
 
                 return result;
               })}
+            {typeof referenceLine !== 'undefined' &&
+              // 평균선 한개로 임의 정의 여러개 추가된다거나 max 등은 추후 개선
+              (() => {
+                const reulst = [];
+                for (let key in referenceLine) {
+                  const yAxisId = getYAxisId({ axisData: yAxisData, key });
+                  reulst.push(
+                    <ReferenceLine
+                      key={key}
+                      y={referenceLine[key].y}
+                      label={
+                        <CustomizedLabel label={referenceLine[key].label} />
+                      }
+                      yAxisId={yAxisId}
+                      stroke={theme.palette.common.red}
+                      // 아래는 점선
+                      // strokeDasharray="3 3"
+                    />
+                  );
+                }
+                return reulst;
+              })()}
           </ComposedChart>
         </ResponsiveContainer>
       </div>

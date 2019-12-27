@@ -43,7 +43,6 @@ client.interceptors.response.use(
     if ([401, 403].indexOf(status) !== -1) {
       // 권한 인증 안된경우
       if (window.location.pathname !== '/login') {
-        debugger;
         window.location.replace('/login');
       }
     }

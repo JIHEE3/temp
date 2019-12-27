@@ -105,6 +105,7 @@ const theme = createMuiTheme({
       gray3: '#9b9ca4',
       gray4: '#f6f6f9',
       gray5: '#b8bfc1',
+      gray6: '#9ba0a2',
       selectedGreen: '#eff9e4',
     },
     primary: {
@@ -130,7 +131,7 @@ const theme = createMuiTheme({
       boxBorder: '#bfe09a',
       boxBG: '#fafdf3',
       inputBG: '#fff',
-      error: '#f00',
+      error: '#2fa6fa',
       defaultTextSize: '.9em',
       menuColor: '#98a2ab',
       checkBox: '#85b74e',

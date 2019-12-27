@@ -1,20 +1,29 @@
 import React from 'react';
-import Link from '@material-ui/core/Link';
-import { Link as RouterLink } from 'react-router-dom';
 import { makeStyles } from '@material-ui/core/styles';
 
 import SelectLang from 'components/molecules/SelectLang';
 
 const LoginFooterStyles = makeStyles(theme => ({
   root: {
-    display: 'flex'
+    display: 'flex',
   },
   footerNav: {
     margin: 'auto',
-    '& > a': {
-      padding: theme.spacing(1)
-    }
-  }
+    fontSize: '16px',
+  },
+  enliple: {
+    color: theme.palette.common.gray6,
+  },
+  loginMulti: {
+    backgroundColor: 'transparent',
+    boxShadow: 'none',
+    color: theme.palette.common.gray6,
+    margin: 0,
+    padding: 7,
+    fontSize: 'inherit',
+    marginLeft: 15,
+    marginTop: -5,
+  },
 }));
 
 const LoginFooter = () => {
@@ -23,25 +32,8 @@ const LoginFooter = () => {
   return (
     <footer className={classes.root}>
       <div className={classes.footerNav}>
-        <Link component={RouterLink} to="/">
-          이용약관
-        </Link>
-        <Link component={RouterLink} to="/">
-          개인정보 처리방침
-        </Link>
-        <Link component={RouterLink} to="/">
-          운영정책
-        </Link>
-        <Link component={RouterLink} to="/">
-          고객센터
-        </Link>
-        <Link component={RouterLink} to="/">
-          공지사항
-        </Link>
-        {/* <Link component={RouterLink} to='/'>
-          한국어
-        </Link> */}
-        <SelectLang />
+        <span className={classes.enliple}>ⓒ 2019 Enliple</span>
+        <SelectLang className={classes.loginMulti} />
       </div>
     </footer>
   );

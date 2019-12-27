@@ -94,7 +94,7 @@ const LoginFormContainer = ({ history }) => {
         })
         .catch(error => {
           console.log(error);
-          setError(error);
+          setError(error.message);
         });
     }
   };

@@ -276,15 +276,32 @@ const UserList = () => {
         label: `${t('상점')} ON/OFF`,
         align: 'center',
         makeRowFunc: data => {
+          const { SHOP_WEB = 'N', SHOP_MOBILE = 'N' } = data;
           return (
-            <MbSwitch
-              onChange={() => {
-                console.log('상점 on/off 클릭');
-              }}
-              value="on"
-              hasLabel
-              checked={true}
-            />
+            <>
+              <div>
+                <span>w: </span>
+                <MbSwitch
+                  onChange={() => {
+                    console.log('상점 on/off 클릭');
+                  }}
+                  value="on"
+                  hasLabel
+                  checked={SHOP_WEB === 'Y'}
+                />
+              </div>
+              <div>
+                <span>M: </span>
+                <MbSwitch
+                  onChange={() => {
+                    console.log('상점 on/off 클릭');
+                  }}
+                  value="on"
+                  hasLabel
+                  checked={SHOP_MOBILE === 'Y'}
+                />
+              </div>
+            </>
           );
         },
       });

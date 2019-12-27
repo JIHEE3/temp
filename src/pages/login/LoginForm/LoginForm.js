@@ -62,7 +62,6 @@ const useStyles = makeStyles(theme => ({
     marginTop: theme.spacing(1),
     color: theme.palette.primary.error,
     fontSize: theme.palette.primary.defaultTextSize,
-    fontWeight: 'bold',
   },
   loginNav: {
     marginLeft: 'auto',

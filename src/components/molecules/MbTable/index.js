@@ -12,11 +12,11 @@ import Table from '@material-ui/core/Table';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import Snackbar from '@material-ui/core/Snackbar';
 
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faFileAlt } from '@fortawesome/pro-regular-svg-icons';
+// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+// import { faFileAlt } from '@fortawesome/pro-regular-svg-icons';
 
 import MbDataState from 'components/atoms/MbDataState';
-import TableToolBarIconButton from 'components/atoms/TableToolBarIconButton';
+// import TableToolBarIconButton from 'components/atoms/TableToolBarIconButton';
 import DivisionWrap from 'components/atoms/DivisionWrap';
 import SnackbarContentWrapper from 'components/molecules/Snackbar/SnackbarContentWrapper';
 import EnhancedTableWrap from 'components/molecules/MbTable/EnhancedTableWrap';
@@ -500,7 +500,7 @@ class EnhancedTableContainer extends React.Component {
   render() {
     const {
       t,
-      theme,
+      // theme,
       className,
       classes,
       dense,
@@ -580,7 +580,7 @@ class EnhancedTableContainer extends React.Component {
                   popoverNotice={t('설정 이후 선택한 컬럼만 노출됩니다.')}
                   saveButtonTitle={t('내 컬럼으로 설정')}
                 />
-                <TableToolBarIconButton
+                {/* <TableToolBarIconButton
                   icon={
                     <FontAwesomeIcon
                       icon={faFileAlt}
@@ -589,7 +589,7 @@ class EnhancedTableContainer extends React.Component {
                     />
                   }
                   label={t('복사')}
-                />
+                /> */}
               </DivisionWrap>
             }
             selectedCnt={selected.length}

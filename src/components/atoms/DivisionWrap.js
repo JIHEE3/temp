@@ -21,12 +21,14 @@ const DivisionWrap = ({ children, ...rest }) => {
 
   return (
     <div className={classes.root} {...rest}>
-      {children.map((el, index) => (
-        <React.Fragment key={index}>
-          {index !== 0 && <div className={classes.division} />}
-          <div>{el}</div>
-        </React.Fragment>
-      ))}
+      {Array.isArray(children)
+        ? children.map((el, index) => (
+            <React.Fragment key={index}>
+              {index !== 0 && <div className={classes.division} />}
+              <div>{el}</div>
+            </React.Fragment>
+          ))
+        : children}
     </div>
   );
 };

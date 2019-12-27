@@ -12,7 +12,7 @@ import MyWindowPortal from 'components/molecules/WindowPortal';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faExternalLink } from '@fortawesome/pro-solid-svg-icons';
 
-import StatisticsGraph from './StatisticsGraph';
+import TargetingGraph from './TargetingGraph';
 
 const useStyles = makeStyles(theme => ({
   firstAdvrtsAmt: {
@@ -1964,7 +1964,7 @@ const Statistics = () => {
       </FilterWrap>
       {getInitParam && (
         <>
-          <StatisticsGraph params={{ ...params }} />
+          <TargetingGraph params={{ ...params }} />
           <TableContainer
             className={classes.root}
             dataReqPromise={dailyTargeting}

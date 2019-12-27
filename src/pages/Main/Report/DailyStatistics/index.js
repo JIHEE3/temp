@@ -6,6 +6,7 @@ import MbTabs from 'components/organisms/MbTabs';
 
 import Statistics from './Statistics';
 import Targeting from './Targeting';
+import Article from './Article';
 
 const DailyStatistics = () => {
   let { path } = useRouteMatch();
@@ -42,6 +43,13 @@ const DailyStatistics = () => {
             tabComponent: (
               <>
                 <Targeting />
+              </>
+            ),
+          },
+          '/report/daily/article': {
+            tabComponent: (
+              <>
+                <Article />
               </>
             ),
           },

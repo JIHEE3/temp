@@ -137,13 +137,13 @@ export default function EnhancedTableHead({
                 }}
               >
                 {content}
-                {orderBy === id ? (
+                {/* {orderBy === id ? (
                   <span className={classes.visuallyHidden}>
                     {order === 'desc'
                       ? 'sorted descending'
                       : 'sorted ascending'}
                   </span>
-                ) : null}
+                ) : null} */}
               </TableSortLabel>
             ) : (
               <>{content}</>

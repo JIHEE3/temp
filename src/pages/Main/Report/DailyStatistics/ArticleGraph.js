@@ -1,6 +1,6 @@
 import React from 'react';
 import i18next from 'i18next';
-// import queryString from 'query-string';
+import queryString from 'query-string';
 import { withTranslation } from 'react-i18next';
 import { withRouter } from 'react-router';
 import { withTheme } from '@material-ui/core/styles';
@@ -57,7 +57,7 @@ const styles = theme => ({
 
 const graphList = [
   {
-    title: i18next.t('소진'),
+    title: i18next.t('지출금액'),
     data: { bar: ['SHOP_CTGR_ADVRTS_AMT', 'ADVRTS_AMT'], line: ['ADVER_CNT'] },
     yAxisData: {
       left: { ADVER_CNT: true },
@@ -195,9 +195,8 @@ class StatisticsGraph extends React.Component {
   }
 
   getData = () => {
-    // const { params, locale, t, location } = this.props;
-    const { params, locale, t } = this.props;
-    // const { uri } = queryString.parse(location.search);
+    const { params, locale, t, location } = this.props;
+    const { uri } = queryString.parse(location.search);
 
     const { sDate, eDate } = params;
     const format = getFormat(locale);
@@ -212,11 +211,9 @@ class StatisticsGraph extends React.Component {
         }),
       }),
     });
-    // params.uri = '/report/daily/par';
-    dailyParGraph({ ...params, uri: '/report/daily/par' })
+    dailyParGraph({ ...params, uri })
       .then(response => {
         const { data } = response.data;
-
         this.setState({
           ...this.state,
           primitiveData: data,
@@ -245,7 +242,6 @@ class StatisticsGraph extends React.Component {
     const { params } = this.props;
 
     if (JSON.stringify(prevParams) !== JSON.stringify(params)) {
-      debugger;
       this.getData();
     }
   }
@@ -338,6 +334,7 @@ class StatisticsGraph extends React.Component {
           legend
           title={title}
           isPercent={isPercent}
+          key={title}
         />
       );
 

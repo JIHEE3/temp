@@ -14,15 +14,11 @@ export const dailyStatisticsDetail = param =>
 /**
  * 일자별 통계 - 구좌별통계 그래프
  */
-export const dailyTargetingParGraph = param =>
-  client.get(`/api/report/day/graph?uri=%2Freport%2Fdaily%2Fpar`, {
+export const dailyParGraph = param =>
+  client.get(`/api/report/day/graph`, {
     params: param,
   });
 
-export const dailyParGraph = param =>
-  client.get(`/api/report/day/graph?uri=%2Freport%2Fdaily%2Fpar`, {
-    params: param,
-  });
 /**
  * test
  */

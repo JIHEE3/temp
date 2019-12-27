@@ -204,7 +204,12 @@ export function numberFormatter(decimal) {
 /**
  * 그래프 데이터 만드는 공통 부분
  */
-export const makeGraph = ({ data, customize, primitiveData }) => {
+export const makeGraph = ({
+  data,
+  customize,
+  primitiveData,
+  referenceLine = {},
+}) => {
   const { bar, line } = data;
   const dataKeys = {};
   const keyLabel = {};
@@ -212,6 +217,7 @@ export const makeGraph = ({ data, customize, primitiveData }) => {
   const graphData = [];
   let customizeData = {};
   const stackId = [];
+  const referenceData = {};
 
   if (typeof bar !== 'undefined') {
     dataKeys['bar'] = bar;
@@ -243,6 +249,16 @@ export const makeGraph = ({ data, customize, primitiveData }) => {
   // graph data 담는 곳
   for (let key in tempGraphData) {
     if (tempGraphData.hasOwnProperty(key)) {
+      // 평균 값 선 넣기 위해
+      let average = false;
+      let sum = 0;
+      let count = 0;
+      if (typeof referenceLine[key] !== 'undefined') {
+        if (referenceLine[key].type === 'average') {
+          average = true;
+        }
+      }
+
       for (let i = 0; i < tempGraphData[key].length; i++) {
         const curGraphData = tempGraphData[key][i];
         let { name, val } = curGraphData;
@@ -258,10 +274,29 @@ export const makeGraph = ({ data, customize, primitiveData }) => {
             keyLabel[key] = customize[key].keyLabel;
           }
         }
+
+        // 평균값 구하기
+        if (average) {
+          sum += Number(val);
+          count++;
+        }
+
         graphData[i] = {
           ...graphData[i],
           name,
           [key]: val,
+        };
+      }
+
+      if (average) {
+        const { label, visibleValue = false } = referenceLine[key];
+        const y = sum / count;
+
+        referenceData[key] = {
+          y,
+          label: visibleValue
+            ? `${label}(${numeral(y).format('0,00')})`
+            : label,
         };
       }
     }
@@ -273,6 +308,7 @@ export const makeGraph = ({ data, customize, primitiveData }) => {
     customizeData,
     keyLabel,
     stackId,
+    referenceData,
   };
 };
 

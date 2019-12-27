@@ -17,18 +17,18 @@ const useStyles = makeStyles(theme => ({
     color: theme.palette.getContrastText(theme.palette.background.header),
     margin: theme.spacing(1),
     '&:hover': {
-      backgroundColor: '#263238'
-    }
+      backgroundColor: '#263238',
+    },
   },
   rightIcon: {
-    marginLeft: theme.spacing(1)
-  }
+    marginLeft: theme.spacing(1),
+  },
 }));
 
-const SelectLang = () => {
+const SelectLang = ({ className = '' }) => {
   const dispatch = useDispatch();
   const { locale } = useSelector(({ locale }) => ({
-    locale: locale.locale
+    locale: locale.locale,
   }));
   const { t } = useTranslation();
   const classes = useStyles();
@@ -57,10 +57,10 @@ const SelectLang = () => {
     <>
       <Button
         variant="contained"
-        className={clsx('mb-SelectLang', classes.langBtn)}
+        className={clsx('mb-SelectLang', classes.langBtn, className)}
         onClick={handleClick}
       >
-        {t(locale)}
+        <span>{t(locale)}</span>
         <ExpandMoreIcon className={classes.rightIcon} />
       </Button>
       <Popover
@@ -69,11 +69,11 @@ const SelectLang = () => {
         onClose={handleClose}
         anchorOrigin={{
           vertical: 'bottom',
-          horizontal: 'right'
+          horizontal: 'right',
         }}
         transformOrigin={{
           vertical: 'top',
-          horizontal: 'right'
+          horizontal: 'right',
         }}
       >
         <ListItem button onClick={() => changeLang('ko')}>

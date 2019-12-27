@@ -63,6 +63,13 @@ const graphList = [
       left: { ADVER_CNT: true },
       right: { SHOP_CTGR_ADVRTS_AMT: true, ADVRTS_AMT: true },
     },
+    referenceLine: {
+      ADVRTS_AMT: {
+        type: 'average',
+        label: i18next.t('평균선'),
+        visibleValue: true,
+      },
+    },
   },
   {
     title: i18next.t('노출'),
@@ -302,9 +309,17 @@ class StatisticsGraph extends React.Component {
 
   /**
    * 버튼 클릭하여 그래프 데이터 변경
+   * graphData json, index
    */
   handleChangeGraph = (
-    { title, data, yAxisData, customizeData: customize, isPercent = false },
+    {
+      title,
+      data,
+      yAxisData,
+      customizeData: customize,
+      isPercent = false,
+      referenceLine,
+    },
     index
   ) => e => {
     const { primitiveData } = this.state;
@@ -317,7 +332,8 @@ class StatisticsGraph extends React.Component {
         customizeData,
         keyLabel,
         stackId,
-      } = makeGraph({ data, customize, primitiveData });
+        referenceData,
+      } = makeGraph({ data, customize, primitiveData, referenceLine });
 
       const result = (
         <MultiplexChart
@@ -335,6 +351,7 @@ class StatisticsGraph extends React.Component {
           title={title}
           isPercent={isPercent}
           key={title}
+          referenceLine={referenceData}
         />
       );
 
